@@ -6,3 +6,4 @@ venv/
 # Ignores only a tmp directory in the root of project
 /tmp/
 test_db.db
+log.log
