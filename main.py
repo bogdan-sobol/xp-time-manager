@@ -8,19 +8,29 @@ from src.controllers.timer_controller import TimerController
 from src.controllers.dashboard_controller import DashboardController
 
 def initialize_models(database: Database):
-    """Initialize all models with proper dependencies"""
+    """
+    Initialize all models.
+    
+    Args:
+        database: Database instance used by all models
+        
+    Returns:
+        tuple: Contains initialized TimerModel and DashboardModel instances
+    """
     user_model = UserModel(database)
     timer_model = TimerModel(database, user_model)
     dashboard_model = DashboardModel(database, user_model)
-    return user_model, timer_model, dashboard_model
+    return timer_model, dashboard_model
+
 
 def initialize_controllers(main_window: MainWindow, 
                          timer_model: TimerModel,
                          dashboard_model: DashboardModel):
-    """Initialize all controllers with their dependencies"""
+    """Initializes all controllers"""
     timer_controller = TimerController(main_window, timer_model)
     dashboard_controller = DashboardController(main_window, dashboard_model)
     return timer_controller, dashboard_controller
+
 
 def main():
     # Initialize application and database
@@ -31,7 +41,7 @@ def main():
     main_window = MainWindow()
 
     # Initialize models and controllers
-    user_model, timer_model, dashboard_model = initialize_models(database)
+    timer_model, dashboard_model = initialize_models(database)
     timer_controller, dashboard_controller = initialize_controllers(
         main_window,
         timer_model,

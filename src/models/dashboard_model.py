@@ -8,9 +8,11 @@ class DashboardModel:
         self.user_model = user_model
         self.logger = setup_logger()
 
+
     def get_user_level(self) -> int:
         return self.user_model.current_user_lvl
-    
+
+
     def get_user_xp(self) -> int:
         return self.user_model.current_user_xp
     
