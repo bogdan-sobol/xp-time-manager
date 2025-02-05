@@ -2,41 +2,45 @@
 # coordinates between main_window.py and timer_model.py
 # and handles user actions
 
+from PyQt6.QtCore import *
 from PyQt6.QtCore import QTimer
-from ..models.timer_model import TimerModel
+from PyQt6.QtWidgets import QWidget
+from PyQt6.QtWidgets import QListWidgetItem
 from ..utils.constants import MAX_ACTIVITY_NAME_SIZE
 
 class TimerController:
-    def __init__(self, view):
-        self.view = view
-        self.model = TimerModel()
+    def __init__(self, main_window, timer_model):
+        self.main_window = main_window
+        self.timer_model = timer_model
         self.update_timer = None
 
     def start_stop_timer(self, activity_name: str) -> bool:
-        if not self.model.is_timer_running:
+        if not self.timer_model.is_timer_running:
             # Validate activity name
             if not activity_name.strip():
-                self.view.show_error("Please enter an activity name!")
+                self.main_window.show_error("Please enter an activity name!")
                 return False
                 
             if len(activity_name) > MAX_ACTIVITY_NAME_SIZE:
-                self.view.show_error("Activity name is too long.")
+                self.main_window.show_error("Activity name is too long.")
                 return False
 
             # Start the timer
-            if self.model.start_timer(activity_name):
+            if self.timer_model.start_timer(activity_name):
                 self._start_update_timer()
-                self.view.set_timer_running_state(True)
+                self.main_window.timer_view.set_timer_running_state(True)
                 return True
             else:
-                self.view.show_error("Could not create time entry")
+                self.main_window.show_error("Could not create time entry")
                 return False
         else:
             # Stop the timer
-            self.model.stop_timer()
+            self.timer_model.stop_timer()
             self._stop_update_timer()
-            self.view.set_timer_running_state(False)
-            self.view.update_history()
+            self.main_window.timer_view.set_timer_running_state(False)
+            self.main_window.timer_view.update_history()
+            # Update information on dashboard
+            self.main_window.dashboard_view.dashboard_controller.update_user_stats()
             return True
 
     def _start_update_timer(self):
@@ -49,10 +53,31 @@ class TimerController:
             self.update_timer.stop()
             self.update_timer.deleteLater()
             self.update_timer = None
+            # Update timer back to 0:00:00
+            self._update_display()
 
     def _update_display(self):
-        current_duration = self.model.get_current_duration()
-        self.view.update_timer_display(current_duration)
+        current_duration = self.timer_model.get_current_duration()
+        self.main_window.timer_view.update_timer_display(current_duration)
 
     def get_recent_entries(self):
-        return self.model.get_recent_entries()
+        return self.timer_model.get_recent_entries()
+    
+    def handle_item_selection(self, item: QListWidgetItem) -> None:
+        """Handle when user clicks on a time entry"""
+        self.timer_model.show_delete_btn(item)
+
+    def delete_time_entry(self, entry_id: int, entry_widget: QWidget) -> None:
+        # Delete entry from database
+        self.timer_model.delete_time_entry(entry_id)
+        # Deletes widget
+        entry_widget.deleteLater()
+        # Updates user statistic
+        self.timer_model.user_model.reevaluate_user_stats()
+        # Updates dashboard view
+        self.main_window.dashboard_controller.update_user_stats()
+        # Update model variables
+        self.timer_model.current_selected_item = None
+        self.timer_model.current_delete_btn = None
+        # Update list
+        self.main_window.timer_view.update_history()
