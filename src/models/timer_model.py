@@ -24,6 +24,7 @@ class TimerModel:
 
         self.logger = setup_logger()
 
+
     def start_timer(self, activity_name: str) -> bool:
         if self.is_timer_running:
             return False
@@ -37,6 +38,7 @@ class TimerModel:
             return True
         self.logger.error("Error in timer_model: returned user's ID is -1")
         return False
+
 
     def stop_timer(self) -> None:
         if not self.is_timer_running:
@@ -62,6 +64,7 @@ class TimerModel:
         self.current_entry_id = None
         self.is_timer_running = False
 
+
     def get_current_duration(self) -> str:
         if not self.is_timer_running:
             return "0:00:00"
@@ -69,8 +72,10 @@ class TimerModel:
         current_duration = datetime.now().timestamp() - self.start_time
         return self._format_duration(current_duration)
 
+
     def get_recent_entries(self, limit: int = 10) -> list:
         return self.db.get_recent_entries(self.user_model.current_user_id, limit)
+
 
     def give_time_session_reward(self, earned_xp: int, entry_id: int) -> None:
         """Calculates and updates user's statistic based on earned XP"""
@@ -93,7 +98,8 @@ class TimerModel:
         self.logger.debug(f"Previous user level: {self.user_model.current_user_lvl}")
         self.logger.debug(f"New user level: {new_user_lvl}")
         self.user_model.set_user_lvl(new_user_lvl, user_id)
-    
+
+
     def show_delete_btn(self, item: QListWidgetItem):
         # Hide delete button of previously selected item
         if self.current_selected_item and self.current_delete_button:
@@ -107,10 +113,12 @@ class TimerModel:
             delete_btn.show()
             self.current_selected_item = item
             self.current_delete_button = delete_btn
-        
+
+
     def delete_time_entry(self, entry_id) -> None:
         # Deletes entry from database
         self.db.delete_time_entry(entry_id, self.user_model.current_user_id)
+
 
     def calculate_earned_xp(self, duration_seconds: int) -> float:
         """Calculates earned XP for a time session and returns it"""
@@ -125,6 +133,7 @@ class TimerModel:
         # Round to 1 decimal place
         earned_xp = float("{:.1f}".format(earned_xp))
         return earned_xp
+
 
     @staticmethod
     def _format_duration(seconds: float) -> str:

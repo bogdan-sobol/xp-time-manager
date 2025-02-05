@@ -14,6 +14,7 @@ class TimerController:
         self.timer_model = timer_model
         self.update_timer = None
 
+
     def start_stop_timer(self, activity_name: str) -> bool:
         if not self.timer_model.is_timer_running:
             # Validate activity name
@@ -43,10 +44,12 @@ class TimerController:
             self.main_window.dashboard_view.dashboard_controller.update_user_stats()
             return True
 
+
     def _start_update_timer(self):
         self.update_timer = QTimer()
         self.update_timer.timeout.connect(self._update_display)
         self.update_timer.start(1000)
+
 
     def _stop_update_timer(self):
         if self.update_timer:
@@ -56,16 +59,20 @@ class TimerController:
             # Update timer back to 0:00:00
             self._update_display()
 
+
     def _update_display(self):
         current_duration = self.timer_model.get_current_duration()
         self.main_window.timer_view.update_timer_display(current_duration)
 
+
     def get_recent_entries(self):
         return self.timer_model.get_recent_entries()
-    
+
+
     def handle_item_selection(self, item: QListWidgetItem) -> None:
         """Handle when user clicks on a time entry"""
         self.timer_model.show_delete_btn(item)
+
 
     def delete_time_entry(self, entry_id: int, entry_widget: QWidget) -> None:
         # Delete entry from database

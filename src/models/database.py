@@ -9,6 +9,7 @@ class Database:
         self.logger = setup_logger()
         self.create_tables()
 
+
     def initialize_default_user(self) -> int:
         """
         Creates default user if it doesn't exist
@@ -31,6 +32,7 @@ class Database:
         except sqlite3.Error as e:
             self.logger.error(f"Database error while initializing default user: {e}")
             return -1
+
 
     def create_tables(self) -> None:
         """Creates the necessary database tables if they don't exist"""
@@ -73,6 +75,7 @@ class Database:
         except sqlite3.Error as e:
             self.logger.error(f"Database error while creating tables: {e}")
 
+
     def add_entry(self, activity_name: str,
                     user_id: int = 1) -> int:
         """Creates a new entry and returns its ID"""
@@ -112,7 +115,8 @@ class Database:
         except sqlite3.Error as e:
             self.logger.error(f"Database error while finishing time entry: {e}")
             return
-    
+
+
     def delete_time_entry(self, entry_id: int, user_id: int = 1) -> None:
         """
         Deletes time entry of a user
@@ -137,6 +141,7 @@ class Database:
             self.logger.error(f"Database error while deleting time entry: {e}")
             return
 
+
     def get_recent_entries(self, user_id: int = 1,
                             limit: int = 10) -> list:
         """Gets most recent time entries
@@ -156,6 +161,7 @@ class Database:
             self.logger.error(f"Database error while getting recent entries: {e}")
             return [] # Return empty list on error
 
+
     def get_total_duration(self, user_id: int = 1) -> int:
         """Return total tracked time in seconds"""
         query = """
@@ -173,6 +179,7 @@ class Database:
             self.logger.error(f"Database error while getting total duration: {e}")
             return 0
 
+
     def get_user_level(self, user_id: int = 1) -> int:
         """Fetches user's level by user's ID
         Returns -1 if error occured"""
@@ -186,7 +193,8 @@ class Database:
         except sqlite3.Error as e:
             self.logger.error(f"Database error while retrieving user's level: {e}")
             return -1
-    
+
+
     def get_user_xp(self, user_id: int = 1) -> int:
         """Fetches user's XP by user's ID
         Returns -1 if error occured"""
@@ -200,7 +208,8 @@ class Database:
         except sqlite3.Error as e:
             self.logger.error(f"Database error while retrieving user's XP: {e}")
             return -1
-        
+
+
     def set_user_lvl(self, level: int, user_id: int = 1) -> None:
         query = "UPDATE users SET level = ? WHERE id = ?;"
 
@@ -211,6 +220,7 @@ class Database:
         except sqlite3.Error as e:
             self.logger.error(f"Database error while retrieving user's XP: {e}")
 
+
     def set_user_xp(self, xp: int, user_id: int = 1) -> None:
         query = "UPDATE users SET total_xp = ? WHERE id = ?;"
 
@@ -220,6 +230,7 @@ class Database:
                 cur.execute(query, (xp, user_id))
         except sqlite3.Error as e:
             self.logger.error(f"Database error while updating user's XP: {e}")
+
 
     def get_total_xp(self, user_id: int = 1):
         query = """
@@ -237,7 +248,8 @@ class Database:
                 return xp[0]
         except sqlite3.Error as e:
             self.logger.error(f"Database error while getting total XP earned: {e}")
-    
+
+
     def insert_into_xp_transactions(self,
                                 xp_amount: float,
                                 source_type: str,
