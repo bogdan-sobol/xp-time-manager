@@ -102,19 +102,23 @@ class TimerModel:
         self.logger.debug(f"New user level: {new_user_level}")
 
 
-    def show_delete_btn(self, item: QListWidgetItem):
+    def show_delete_button(self, item: QListWidgetItem):
+        """
+        Hides previosly showed delete button if any
+        Shows delete button of the selected item in the list
+        """
         # Hide delete button of previously selected item
         if self.current_selected_item and self.current_delete_button:
             self.current_delete_button.hide()
 
         # Get the delete button associated with clicked item
-        delete_btn = item.data(Qt.ItemDataRole.UserRole)
+        delete_button = item.data(Qt.ItemDataRole.UserRole)
         
         # Show delete button of newly selected item
-        if delete_btn:
-            delete_btn.show()
+        if delete_button:
+            delete_button.show()
             self.current_selected_item = item
-            self.current_delete_button = delete_btn
+            self.current_delete_button = delete_button
 
 
     def delete_time_entry(self, entry_id) -> None:

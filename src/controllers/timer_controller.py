@@ -15,7 +15,7 @@ class TimerController:
         self.update_timer = None
 
 
-    def start_stop_timer(self, activity_name: str) -> bool:
+    def handle_start_stop_button_clicked(self, activity_name: str) -> bool:
         """
         Handles start/stop button in timer view
         Returns False if something went wrong
@@ -23,7 +23,8 @@ class TimerController:
         # If timer is not running - start timer
         if not self.timer_model.is_timer_running:
             # Validate activity name
-            if not activity_name.strip():
+            activity_name = activity_name.strip()
+            if not activity_name:
                 self.main_window.show_error("Please enter an activity name!")
                 return False
                 
@@ -67,7 +68,7 @@ class TimerController:
             self._update_display()
 
 
-    def _update_display(self):
+    def _update_elapsed_time_display(self):
         current_duration = self.timer_model.get_current_duration()
         self.main_window.timer_view.update_timer_display(current_duration)
 
@@ -78,7 +79,7 @@ class TimerController:
 
     def handle_item_selection(self, item: QListWidgetItem) -> None:
         """Handles when user clicks on a time entry"""
-        self.timer_model.show_delete_btn(item)
+        self.timer_model.show_delete_button(item)
 
 
     def delete_time_entry(self, entry_id: int, entry_widget: QWidget) -> None:
