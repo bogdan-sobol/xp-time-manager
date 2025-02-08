@@ -262,25 +262,31 @@ class Database:
             self.logger.error(f"Database error while updating user's XP: {e}")
 
 
-    def get_total_xp(self, user_id: int = 1) -> int:
+    def get_total_xp(self, user_id: int = 1) -> float:
         """
         Summorazies all XP transactions of one user and returns it
-        Returns 0 on an error
+        Returns 0.0 if the result is None
         """
         query = """
             SELECT SUM(xp_amount)
             FROM xp_transactions
             WHERE user_id = ?"""
         
+        # The xp_amount rows are stored as float, so the sum is a float
         total_xp = self.select_and_fetchone(query, (user_id,))
 
         if total_xp == None:
             self.logger.warning("get_total_xp function in database.py returned None")
-            return 0
+            return 0.0
         
-        if not isinstance(total_xp, int):
-            self.logger.error("get_total_xp function in database.py returned not an integer")
-            return 0
+        if not isinstance(total_xp, float):
+            self.logger.warning("get_total_xp returned not a float, trying to convert it...")
+            try:
+                total_xp = float(total_xp)
+                return total_xp
+            except:
+                self.logger.error("Failed to convert total XP from get_total_xp in database.py into a float")
+                return 0.0
         
         return total_xp
 

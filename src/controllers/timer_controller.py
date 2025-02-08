@@ -77,21 +77,21 @@ class TimerController:
 
 
     def handle_item_selection(self, item: QListWidgetItem) -> None:
-        """Handle when user clicks on a time entry"""
+        """Handles when user clicks on a time entry"""
         self.timer_model.show_delete_btn(item)
 
 
     def delete_time_entry(self, entry_id: int, entry_widget: QWidget) -> None:
-        # Delete entry from database
+        # Deletes entry from database
         self.timer_model.delete_time_entry(entry_id)
-        # Deletes widget
+        # Deletes entry widget
         entry_widget.deleteLater()
         # Updates user statistic
         self.timer_model.user_model.reevaluate_user_stats()
         # Updates dashboard view
         self.main_window.dashboard_controller.update_user_stats()
-        # Update model variables
+        # Updates selected entry variables
         self.timer_model.current_selected_item = None
         self.timer_model.current_delete_btn = None
-        # Update list
+        # Updates entry list to remove blank space
         self.main_window.timer_view.update_history()

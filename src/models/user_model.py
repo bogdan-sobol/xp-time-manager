@@ -60,49 +60,46 @@ class UserModel:
 
     def reevaluate_user_xp(self) -> float:
         """
-        Summorizes all xp transactions of one user
+        Summorizes earned XP from xp_transactions table of current user
         Returns the result
         """
-        self.logger.debug("Reevaluating user XP by summorizing all XP transactions")
         total_xp = self.db.get_total_xp(self.current_user_id)
-        self.logger.debug(f"Reevaluated XP = {total_xp}")
-
-        if total_xp == None:
-            return 0.0
-        
-        # Convert XP value to float because user's XP stored as a float
-        if not isinstance(total_xp, float):
-            total_xp = float(total_xp)
-        
         return total_xp
 
 
     def reevaluate_user_stats(self):
         """
         Reevaluates user statiscic
-        via summorizing xp transactions
+        via summorizing xp from the xp_transactions table
         and calculating user level based on it
         Updates users table with this information
         """
+        self.logger.info("Reevaluating user's statistic...")
+        self.logger.debug(f"Previous user's level: {self.current_user_level}")
+        self.logger.debug(f"Previous user's XP: {self.current_user_xp} XP")
         # Summorizes xp amounts from the xp_transactions table for current user
         self.current_user_xp = self.reevaluate_user_xp()
-        # Update database with the new XP value
+        # Updates users table with the new XP value
         self.set_user_xp(self.current_user_xp, self.current_user_id)
-        # Calculate new level based on new XP
+        # Calculates new level based on new XP
         self.current_user_level = self.evaluate_level(self.current_user_xp)
         # Also update database with the new level value
-        self.set_user_level(self.current_user_id, self.current_user_id)
+        self.set_user_level(self.current_user_level, self.current_user_id)
+
+        self.logger.info("Finished statistic's reevaluation")
+        self.logger.debug(f"New user's level: {self.current_user_level}")
+        self.logger.debug(f"New user's XP: {self.current_user_xp} XP")
 
 
-    def evaluate_level(self, total_xp) -> int:
+    @staticmethod
+    def evaluate_level(total_xp) -> int:
         """Evaluates level based on total XP amount and returns it"""
         if total_xp == None:
             return 0
         
         if total_xp <= 0:
             return 0
-        
-        lvl = None
+
         if total_xp <= 352:
             lvl = math.sqrt(total_xp + 9) - 3
         elif total_xp <= 1507:
@@ -113,7 +110,8 @@ class UserModel:
         return int(lvl)
 
 
-    def calculate_xp_leftover(self, user_level: int) -> int:
+    @staticmethod
+    def calculate_xp_leftover(user_level: int) -> int:
         """
         Calculates how much XP is needed to advance to the next level.
         Returns amount of XP needed to reach the next level
@@ -125,7 +123,6 @@ class UserModel:
             Level 2 -> returns 11 (need 11 XP to reach level 3 from level 2)
         """
         if user_level == None:
-            self.logger.error("Passed user level to calculate_xp_to_next_level in user_model.py is None")
             return 0
         
         # Formulas are taken from:
@@ -141,7 +138,8 @@ class UserModel:
         return int(xp_lefover)
 
 
-    def calculate_xp_collected(self, user_level: int) -> int:
+    @staticmethod
+    def calculate_xp_collected(user_level: int) -> int:
         """
         Calculates how much experience has been collected to reach a level
         """
