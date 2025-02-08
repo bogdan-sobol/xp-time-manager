@@ -16,6 +16,11 @@ class TimerController:
 
 
     def start_stop_timer(self, activity_name: str) -> bool:
+        """
+        Handles start/stop button in timer view
+        Returns False if something went wrong
+        """
+        # If timer is not running - start timer
         if not self.timer_model.is_timer_running:
             # Validate activity name
             if not activity_name.strip():
@@ -26,7 +31,7 @@ class TimerController:
                 self.main_window.show_error("Activity name is too long.")
                 return False
 
-            # Start the timer
+            # Start timer
             if self.timer_model.start_timer(activity_name):
                 self._start_update_timer()
                 self.main_window.timer_view.set_timer_running_state(True)
@@ -35,12 +40,14 @@ class TimerController:
                 self.main_window.show_error("Could not create time entry")
                 return False
         else:
-            # Stop the timer
+            # Stops timer
             self.timer_model.stop_timer()
+            # Stops timer display in view
             self._stop_update_timer()
             self.main_window.timer_view.set_timer_running_state(False)
+            # Updates history to show newly added entry
             self.main_window.timer_view.update_history()
-            # Update information on dashboard
+            # Requests information update on dashboard to display updated statistic
             self.main_window.dashboard_view.dashboard_controller.update_user_stats()
             return True
 
@@ -56,7 +63,7 @@ class TimerController:
             self.update_timer.stop()
             self.update_timer.deleteLater()
             self.update_timer = None
-            # Update timer back to 0:00:00
+            # Makes sure timer is back to 0:00:00
             self._update_display()
 
 
