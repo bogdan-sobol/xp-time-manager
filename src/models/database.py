@@ -16,22 +16,42 @@ class Database:
         Returns default user's ID
         Returns -1 in case of an error
         """
-        query = """
+        insert_default_user_query = """
             INSERT OR IGNORE INTO users
             (username, level, total_xp)
             VALUES ('default_user', 0, 0);"""
         
-        id = "SELECT id FROM users WHERE username = ?"
+        select_user_id_query = "SELECT id FROM users WHERE username = ?"
         
         try:
             with sqlite3.connect(DB_NAME) as conn:
                 cur = conn.cursor()
-                cur.execute(query)
-                cur.execute(id, ("default_user",))
+                cur.execute(insert_default_user_query)
+                cur.execute(select_user_id_query, ("default_user",))
                 return cur.fetchone()[0]
         except sqlite3.Error as e:
             self.logger.error(f"Database error while initializing default user: {e}")
             return -1
+
+
+    def select_and_fetchone(self, query: str, parameters: tuple):
+        """
+        Executes select query and returns its result
+        Returs None if nothing were found or an error occured
+        """
+        try:
+            with sqlite3.connect(DB_NAME) as conn:
+                cur = conn.cursor()
+                cur.execute(query, parameters)
+                result = cur.fetchone()
+
+                if result == None:
+                    return None
+                
+                return result[0]
+        except sqlite3.Error as e:
+            self.logger.error(f"Database error while executing and fetching one result: {e}")
+            return None
 
 
     def create_tables(self) -> None:
@@ -76,7 +96,7 @@ class Database:
             self.logger.error(f"Database error while creating tables: {e}")
 
 
-    def add_entry(self, activity_name: str,
+    def start_time_entry(self, activity_name: str,
                     user_id: int = 1) -> int:
         """Creates a new entry and returns its ID"""
         query = """
@@ -95,22 +115,22 @@ class Database:
             self.logger.error(f"Database error while adding time entry: {e}")
             return -1
 
-    def finish_entry(self, entry_id: int,
+
+    def stop_time_entry(self, entry_id: int,
                     seconds_duration: int,
-                    formatted_duration: str,
-                    user_id: int = 1) -> None:
+                    formatted_duration: str) -> None:
         """Adds end time and duration to current entry"""
         query = """
             UPDATE time_entries
-            SET user_id = ?,
-            duration = ?, duration_seconds = ?,
+            SET duration = ?,
+            duration_seconds = ?,
             end_time = ? WHERE id = ?;"""
 
         try:
             with sqlite3.connect(DB_NAME) as conn:
                 cur = conn.cursor()
                 end_time = datetime.now().strftime(TIME_FORMAT)
-                cur.execute(query, (user_id, formatted_duration,
+                cur.execute(query, (formatted_duration,
                     seconds_duration, end_time, entry_id))
         except sqlite3.Error as e:
             self.logger.error(f"Database error while finishing time entry: {e}")
@@ -126,7 +146,7 @@ class Database:
             DELETE FROM time_entries
             WHERE user_id = ?
             AND id = ?"""
-        delete_xp_transation = """
+        delete_xp_transaction = """
             DELETE FROM xp_transactions
             WHERE user_id = ? 
             AND source_type = 'time_session'
@@ -136,7 +156,7 @@ class Database:
             with sqlite3.connect(DB_NAME) as conn:
                 cur = conn.cursor()
                 cur.execute(delete_time_entry, (user_id, entry_id))
-                cur.execute(delete_xp_transation, (user_id, entry_id))
+                cur.execute(delete_xp_transaction, (user_id, entry_id))
         except sqlite3.Error as e:
             self.logger.error(f"Database error while deleting time entry: {e}")
             return
@@ -144,8 +164,11 @@ class Database:
 
     def get_recent_entries(self, user_id: int = 1,
                             limit: int = 10) -> list:
-        """Gets most recent time entries
-        And returns them as a list of tuples"""
+        """
+        Gets most recent time entries
+        Returns them in descending order 
+        As a list of tuples
+        """
         query = """
             SELECT * FROM time_entries
             WHERE user_id = ?
@@ -168,49 +191,56 @@ class Database:
             SELECT SUM(duration_seconds)
             FROM time_entries
             WHERE user_id = ?;"""
+        
+        total_duration = self.select_and_fetchone(query, (user_id,))
 
-        try:
-            with sqlite3.connect(DB_NAME) as conn:
-                cur = conn.cursor()
-                cur.execute(query, (user_id,))
-                total = cur.fetchone()[0]
-                return total if total else 0 # Handle empty database
-        except sqlite3.Error as e:
-            self.logger.error(f"Database error while getting total duration: {e}")
+        if total_duration == None:
             return 0
+        
+        return total_duration
 
 
     def get_user_level(self, user_id: int = 1) -> int:
-        """Fetches user's level by user's ID
-        Returns -1 if error occured"""
+        """
+        Fetches user's level by user's ID
+        Returns 0 if nothing found or an error occured
+        """
         query = "SELECT level FROM users WHERE id = ?"
 
-        try:
-            with sqlite3.connect(DB_NAME) as conn:
-                cur = conn.cursor()
-                cur.execute(query, (user_id,))
-                return cur.fetchone()[0]
-        except sqlite3.Error as e:
-            self.logger.error(f"Database error while retrieving user's level: {e}")
-            return -1
+        user_level = self.select_and_fetchone(query, (user_id,))
+
+        if user_level == None:
+            self.logger.warning("get_user_level function in database.py returned None")
+            return 0
+        
+        if not isinstance(user_level, int):
+            self.logger.error("get_user_level function in database.py returned not an integer")
+            return 0
+        
+        return user_level
 
 
-    def get_user_xp(self, user_id: int = 1) -> int:
-        """Fetches user's XP by user's ID
-        Returns -1 if error occured"""
+    def get_user_xp(self, user_id: int = 1) -> float:
+        """
+        Fetches user's XP by user's ID
+        Returns 0.0 if nothing found or an error occured
+        """
         query = "SELECT total_xp FROM users WHERE id = ?"
 
-        try:
-            with sqlite3.connect(DB_NAME) as conn:
-                cur = conn.cursor()
-                cur.execute(query, (user_id,))
-                return cur.fetchone()[0]
-        except sqlite3.Error as e:
-            self.logger.error(f"Database error while retrieving user's XP: {e}")
-            return -1
+        user_xp = self.select_and_fetchone(query, (user_id,))
+
+        if user_xp == None:
+            self.logger.warning("get_user_xp function in database.py returned None")
+            return 0.0
+        
+        if not isinstance(user_xp, float):
+            self.logger.error("get_user_xp function in database.py returned not a float")
+            return 0.0
+        
+        return user_xp
 
 
-    def set_user_lvl(self, level: int, user_id: int = 1) -> None:
+    def set_user_level(self, level: int, user_id: int = 1) -> None:
         query = "UPDATE users SET level = ? WHERE id = ?;"
 
         try:
@@ -232,22 +262,27 @@ class Database:
             self.logger.error(f"Database error while updating user's XP: {e}")
 
 
-    def get_total_xp(self, user_id: int = 1):
+    def get_total_xp(self, user_id: int = 1) -> int:
+        """
+        Summorazies all XP transactions of one user and returns it
+        Returns 0 on an error
+        """
         query = """
             SELECT SUM(xp_amount)
             FROM xp_transactions
             WHERE user_id = ?"""
         
-        try:
-            with sqlite3.connect(DB_NAME) as conn:
-                cur = conn.cursor()
-                cur.execute(query, (user_id,))
-                xp = cur.fetchone()
-                if not xp:
-                    return 0
-                return xp[0]
-        except sqlite3.Error as e:
-            self.logger.error(f"Database error while getting total XP earned: {e}")
+        total_xp = self.select_and_fetchone(query, (user_id,))
+
+        if total_xp == None:
+            self.logger.warning("get_total_xp function in database.py returned None")
+            return 0
+        
+        if not isinstance(total_xp, int):
+            self.logger.error("get_total_xp function in database.py returned not an integer")
+            return 0
+        
+        return total_xp
 
 
     def insert_into_xp_transactions(self,

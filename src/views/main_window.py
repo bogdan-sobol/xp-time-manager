@@ -320,28 +320,32 @@ class DashboardView(QWidget):
 
 
     def create_stats_view(self):
-        self.user_lvl = QLabel("")
-        self.user_xp = QLabel("")
+        self.user_level_label = QLabel("")
+        self.user_xp_label = QLabel("")
 
-        self.user_lvl.setAlignment(Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignHCenter)
-        self.user_xp.setAlignment(Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignHCenter)
+        self.user_level_label.setAlignment(
+            Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignHCenter
+        )
+        self.user_xp_label.setAlignment(
+            Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignHCenter
+        )
 
         stats = QWidget()
         stats_layout = QHBoxLayout(stats)
 
-        stats_layout.addWidget(self.user_lvl)
-        stats_layout.addWidget(self.user_xp)
+        stats_layout.addWidget(self.user_level_label)
+        stats_layout.addWidget(self.user_xp_label)
 
         return stats
 
 
-    def update_user_lvl(self, level: int):
+    def update_user_level(self, level: int):
         self.logger.debug("Updating level label in dashboard view...")
         self.logger.debug(f"New level value is: {level}")
-        self.user_lvl.setText(f"Level: {level}")
+        self.user_level_label.setText(f"Level: {level}")
 
 
-    def update_user_xp(self, current_xp: float, xp_left: int):
+    def update_user_xp(self, current_xp: float, xp_leftover: int):
         self.logger.debug("Updating XP label in dashboard view...")
-        self.logger.debug(f"New XP value is: {current_xp}/{xp_left}")
-        self.user_xp.setText(f"XP: {current_xp}/{xp_left}")
+        self.logger.debug(f"New XP value is: {current_xp}/{xp_leftover}")
+        self.user_xp_label.setText(f"XP: {current_xp}/{xp_leftover}")

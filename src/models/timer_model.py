@@ -31,7 +31,7 @@ class TimerModel:
 
         user_id = self.user_model.current_user_id
         self.start_time = datetime.now().timestamp()
-        self.current_entry_id = self.db.add_entry(activity_name, user_id)
+        self.current_entry_id = self.db.start_time_entry(activity_name, user_id)
 
         if self.current_entry_id != -1:
             self.is_timer_running = True
@@ -44,20 +44,17 @@ class TimerModel:
         if not self.is_timer_running:
             return
         
-        user_id = self.user_model.current_user_id
         end_time = datetime.now().timestamp()
         duration_seconds = int(end_time - self.start_time)
         formatted_duration = self._format_duration(duration_seconds)
 
-        self.db.finish_entry(
+        self.db.stop_time_entry(
             self.current_entry_id,
             duration_seconds,
-            formatted_duration,
-            user_id
+            formatted_duration
         )
 
         xp_earned = self.calculate_earned_xp(duration_seconds)
-        self.logger.info(f"XP earned for the session: {xp_earned}")
         self.give_time_session_reward(xp_earned, self.current_entry_id)
 
         self.start_time = None
@@ -78,26 +75,31 @@ class TimerModel:
 
 
     def give_time_session_reward(self, earned_xp: int, entry_id: int) -> None:
-        """Calculates and updates user's statistic based on earned XP"""
+        """
+        Calculates user's statistic based on earned XP
+        Sets new value in the users and xp_transactions tables
+        """
         user_id = self.user_model.current_user_id
         user_total_xp = self.user_model.current_user_xp
-        self.logger.debug(f"Previous XP amount: {user_total_xp}")
+        self.logger.debug(f"XP amount before reward: {user_total_xp}")
 
+        # Updates user's XP
         new_xp_amount = user_total_xp + earned_xp
         self.logger.debug(f"New XP amount: {new_xp_amount}")
-        # Set user XP in users table
         self.user_model.set_user_xp(new_xp_amount)
-        # Add entry to xp_transactions
+
+        # Adds entry to xp_transactions table
         self.db.insert_into_xp_transactions(
             xp_amount=earned_xp,
             source_type="time_session",
             source_id=entry_id,
             user_id=user_id)
 
-        new_user_lvl = self.user_model.evaluate_level(new_xp_amount)
-        self.logger.debug(f"Previous user level: {self.user_model.current_user_lvl}")
-        self.logger.debug(f"New user level: {new_user_lvl}")
-        self.user_model.set_user_lvl(new_user_lvl, user_id)
+        # Updates user's level
+        self.logger.debug(f"User level before reward: {self.user_model.current_user_level}")
+        new_user_level = self.user_model.evaluate_level(new_xp_amount)
+        self.user_model.set_user_level(new_user_level, user_id)
+        self.logger.debug(f"New user level: {new_user_level}")
 
 
     def show_delete_btn(self, item: QListWidgetItem):
@@ -131,8 +133,10 @@ class TimerModel:
         earned_xp = (duration_seconds / SECONDS_UNTIL_REWARD) * XP_REWARD
 
         # Round to 1 decimal place
-        earned_xp = float("{:.1f}".format(earned_xp))
-        return earned_xp
+        earned_xp = "{:.1f}".format(earned_xp)
+        self.logger.info(f"XP reward is: {earned_xp} XP")
+
+        return float(earned_xp)
 
 
     @staticmethod
