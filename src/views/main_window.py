@@ -179,11 +179,11 @@ class TimerView(QWidget):
 class TimeEntry(QWidget):
     def __init__(self, entry_info: tuple):
         super().__init__()
-        # Treat self as container widget
+        # Treat "self" as container widget with margins
         container_layout = self._create_container_layout()
         entry_widget = self._create_entry_widget()
 
-        # Create the main layout for the entry
+        # Creates the main layout for the entry
         entry_layout = self._create_entry_layout()
         entry_widget.setLayout(entry_layout)
 
@@ -278,8 +278,8 @@ class TimeEntry(QWidget):
         """
         Connects delete_btn with timer_controller function
         """
-        # Passes entry ID and the whole widget itself to be deleted
         # Entry ID references id in the time_entries table
+        # Passes entry ID and the whole widget itself to be deleted
         self.delete_btn.clicked.connect(lambda: controller_delete_entry(entry_id, self))
 
 
