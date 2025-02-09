@@ -1,6 +1,4 @@
-# timer_controller.py
-# coordinates between main_window.py and timer_model.py
-# and handles user actions
+# activity_timer_controller.py
 
 from PyQt6.QtCore import *
 from PyQt6.QtCore import QTimer
@@ -8,7 +6,7 @@ from PyQt6.QtWidgets import QWidget
 from PyQt6.QtWidgets import QListWidgetItem
 from ..utils.constants import MAX_ACTIVITY_NAME_SIZE
 
-class TimerController:
+class ActivityTimerController:
     def __init__(self, main_window, timer_model):
         self.main_window = main_window
         self.timer_model = timer_model

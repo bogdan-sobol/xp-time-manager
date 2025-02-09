@@ -2,7 +2,7 @@
 
 from ..utils.logger import setup_logger
 
-class DashboardModel:
+class UserStatsModel:
     def __init__(self, database, user_model):
         self.db = database
         self.user_model = user_model

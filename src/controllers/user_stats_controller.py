@@ -1,7 +1,6 @@
-# dashboard_contoller.py
-# coordinates between main_window.py and dashboard_model.py
+# user_stats_contoller.py
 
-class DashboardController:
+class UserStatsController:
     def __init__(self, main_window, dashboard_model):
         self.main_window = main_window
         self.dashboard_model = dashboard_model

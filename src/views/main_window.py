@@ -103,7 +103,7 @@ class ActivityTimerPanel(QWidget):
         """Creates and adds a new activity entry to the history list"""
         # ID of row in the time_entries table
         entry_id = activity_data[0]
-        entry_widget = TimeEntry(activity_data)
+        entry_widget = ActivityHistoryEntry(activity_data)
         list_item = entry_widget.list_item
 
         entry_widget.setup_delete_action(
