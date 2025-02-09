@@ -1,11 +1,11 @@
 from PyQt6.QtWidgets import QApplication
 from src.models.database import Database
-from src.views.main_window import MainWindow
+from src.views.main_window import ApplicationWindow
 from src.models.user_model import UserModel
-from src.models.timer_model import TimerModel
-from src.models.dashboard_model import DashboardModel
-from src.controllers.timer_controller import TimerController
-from src.controllers.dashboard_controller import DashboardController
+from models.activity_timer_model import ActivityTimerModel
+from models.user_stats_model import UserStatsModel
+from controllers.activity_timer_controller import ActivityTimerController
+from controllers.user_stats_controller import UserStatsController
 
 def initialize_models(database: Database):
     """
@@ -15,21 +15,25 @@ def initialize_models(database: Database):
         database: Database instance used by all models
         
     Returns:
-        tuple: Contains initialized TimerModel and DashboardModel instances
+        tuple: Contains initialized ActivityTimerModel and UserStatsModel instances
     """
     user_model = UserModel(database)
-    timer_model = TimerModel(database, user_model)
-    dashboard_model = DashboardModel(database, user_model)
-    return timer_model, dashboard_model
+    activity_timer_model = ActivityTimerModel(database, user_model)
+    user_stats_model = UserStatsModel(database, user_model)
+    return activity_timer_model, user_stats_model
 
 
-def initialize_controllers(main_window: MainWindow, 
-                         timer_model: TimerModel,
-                         dashboard_model: DashboardModel):
+def initialize_controllers(app_window: ApplicationWindow, 
+                        activity_timer_model: ActivityTimerModel,
+                        user_stats_model: UserStatsModel):
     """Initializes all controllers"""
-    timer_controller = TimerController(main_window, timer_model)
-    dashboard_controller = DashboardController(main_window, dashboard_model)
-    return timer_controller, dashboard_controller
+    activity_timer_controller = ActivityTimerController(
+        app_window, activity_timer_model
+    )
+    user_stats_controller = UserStatsController(
+        app_window, user_stats_model
+    )
+    return activity_timer_controller, user_stats_controller
 
 
 def main():
@@ -38,20 +42,23 @@ def main():
     database = Database()
 
     # Create main window
-    main_window = MainWindow()
+    app_window = ApplicationWindow()
 
     # Initialize models and controllers
-    timer_model, dashboard_model = initialize_models(database)
-    timer_controller, dashboard_controller = initialize_controllers(
-        main_window,
-        timer_model,
-        dashboard_model
+    activity_timer_model, user_stats_model = initialize_models(database)
+    activity_timer_controller, user_stats_controller = initialize_controllers(
+        app_window,
+        activity_timer_model,
+        user_stats_model
     )
 
     # Setup main window
-    main_window.initialize_controllers(timer_controller, dashboard_controller)
-    main_window.initUI()
-    main_window.show()
+    app_window.initialize_controllers(
+        activity_timer_controller,
+        user_stats_controller
+    )
+    app_window.initUI()
+    app_window.show()
 
     app.exec()
 

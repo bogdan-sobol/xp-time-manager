@@ -1,15 +1,12 @@
-# timer_model.py
-# handles business logic like timer calculations,
-# XP calculations and related database operations
+# activity_timer_model.py
 
-import math
 from datetime import datetime
 from PyQt6.QtCore import *
 from PyQt6.QtWidgets import QListWidgetItem
 from ..utils.logger import setup_logger
 from ..utils.constants import SECONDS_UNTIL_REWARD, XP_REWARD
 
-class TimerModel:
+class ActivityTimerModel:
     def __init__(self, database, user_model):
         self.db = database
         self.user_model = user_model
