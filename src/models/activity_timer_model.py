@@ -30,11 +30,12 @@ class ActivityTimerModel:
         self.start_time = datetime.now().timestamp()
         self.current_entry_id = self.db.start_time_entry(activity_name, user_id)
 
-        if self.current_entry_id != -1:
-            self.is_timer_running = True
-            return True
-        self.logger.error("Error in timer_model: returned user's ID is -1")
-        return False
+        if self.current_entry_id == -1:
+            self.logger.error("Error in timer_model: returned user's ID is -1")
+            return False
+        
+        self.is_timer_running = True
+        return True
 
 
     def stop_timer(self) -> None:

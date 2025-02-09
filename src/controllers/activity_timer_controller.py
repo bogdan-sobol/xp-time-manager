@@ -4,7 +4,7 @@ from PyQt6.QtCore import QTimer
 from PyQt6.QtWidgets import QWidget, QListWidgetItem
 from ..utils.constants import MAX_ACTIVITY_NAME_SIZE
 
-class ActivityTimerController:
+class ActivityTimerController:  
     """
     Controls the interaction between the UI and the activity timer model
     
@@ -14,7 +14,6 @@ class ActivityTimerController:
     Attributes:
         app_window: The main application window containing all views
         activity_timer_model: The model handling timer logic and data persistence
-        display_update_timer: QTimer instance for updating the elapsed time display
     """
     def __init__(self, app_window, activity_timer_model):
         self.app_window = app_window
@@ -24,10 +23,10 @@ class ActivityTimerController:
 
     def handle_start_stop_button_clicked(self, activity_name: str) -> bool:
         """
-        Handle the start/stop button click event in the timer view
+        Handle the start/stop button click event in the timer view.
         
-        If the timer is not running, starts a new activity timer
-        If the timer is running, stops the current activity timer
+        If the timer is not running, starts a new activity timer.
+        If the timer is running, stops the current activity timer.
         
         Args:
             activity_name: Name of the activity to time
@@ -41,37 +40,10 @@ class ActivityTimerController:
             - Updates history view
             - Updates dashboard statistics
         """
-        # If timer is not running - start timer
-        if not self.timer_model.is_timer_running:
-            # Validate activity name
-            activity_name = activity_name.strip()
-            if not activity_name:
-                self.main_window.show_error("Please enter an activity name!")
-                return False
-                
-            if len(activity_name) > MAX_ACTIVITY_NAME_SIZE:
-                self.main_window.show_error("Activity name is too long.")
-                return False
-
-            # Start timer
-            if self.timer_model.start_timer(activity_name):
-                self._start_update_timer()
-                self.main_window.timer_view.set_timer_running_state(True)
-                return True
-            else:
-                self.main_window.show_error("Could not create time entry")
-                return False
+        if not self.activity_timer_model.is_timer_running:
+            return self._start_new_activity(activity_name)
         else:
-            # Stops timer
-            self.timer_model.stop_timer()
-            # Stops timer display in view
-            self._stop_update_timer()
-            self.main_window.timer_view.set_timer_running_state(False)
-            # Updates history to show newly added entry
-            self.main_window.timer_view.update_history()
-            # Requests information update on dashboard to display updated statistic
-            self.main_window.dashboard_view.dashboard_controller.update_user_stats()
-            return True
+            return self._stop_current_activity()
 
 
     def _start_new_activity(self, activity_name: str) -> bool:
@@ -128,7 +100,7 @@ class ActivityTimerController:
         """
         self.activity_timer_model.stop_timer()
         self._stop_display_updates()
-        self.app_window.timer_view.update_timer_state(False)
+        self.app_window.activity_timer_panel.update_timer_state(False)
         self._refresh_views_after_stop()
         return True
 
@@ -136,7 +108,7 @@ class ActivityTimerController:
     def _refresh_views_after_stop(self) -> None:
         """Update all relevant views after stopping an activity"""
         self.app_window.activity_timer_panel.refresh_activity_history()
-        self.app_window.user_stats_controller.update_user_stats()
+        self.app_window.user_stats_controller.refresh_user_statistics()
 
 
     def _start_display_updates(self) -> None:
@@ -201,7 +173,7 @@ class ActivityTimerController:
         
         # Update statistics and views
         self.activity_timer_model.user_model.reevaluate_user_stats()
-        self.app_window.user_stats_controller.update_user_stats()
+        self.app_window.user_stats_controller.refresh_user_statistics()
         
         # Reset selection state
         self.activity_timer_model.current_selected_item = None

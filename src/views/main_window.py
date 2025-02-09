@@ -1,7 +1,3 @@
-# main_window.py
-# Handles the application's main user interface components and data visualization
-# Uses PyQt6 for creating a desktop application with timer and dashboard features
-
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
 from PyQt6.QtCore import *
@@ -47,12 +43,12 @@ class ApplicationWindow(QMainWindow):
     def initUI(self) -> None:
         """Initializes and arranges all UI components"""
         self.window_layout = self.create_main_window()
-        self.stats_panel = UserStatsPanel(self.user_stats_controller)
+        self.user_stats_panel = UserStatsPanel(self.user_stats_controller)
         self.activity_timer_panel = ActivityTimerPanel(self.activity_timer_controller)
         self.user_stats_controller.refresh_user_statistics()
 
         # Add panels with specific size proportions
-        self.window_layout.addWidget(self.stats_panel, stretch=5)
+        self.window_layout.addWidget(self.user_stats_panel, stretch=5)
         self.window_layout.addWidget(self.activity_timer_panel, stretch=4)
 
 
@@ -71,7 +67,7 @@ class ActivityTimerPanel(QWidget):
         """Creates a scrollable list view for displaying activity history"""
         activity_list = QListWidget()
         activity_list.itemClicked.connect(
-            self.timer_controller.handle_item_selection
+            self.activity_timer_controller.handle_time_entry_selection
         )
         activity_list.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         activity_list.setStyleSheet("""
@@ -143,12 +139,12 @@ class ActivityTimerPanel(QWidget):
         self.elapsed_time_display.setAlignment(
             Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
         )
-        control_panel.addWidget(self.live_timer)
+        control_panel.addWidget(self.elapsed_time_display)
 
         # TO-DO: Make this button circular
         self.timer_toggle_button = QPushButton("Start")
         self.timer_toggle_button.clicked.connect(self.handle_timer_toggle)
-        control_panel.addWidget(self.start_stop_btn)
+        control_panel.addWidget(self.timer_toggle_button)
 
         # Create widget to place layout
         control_panel_widget = QWidget()
@@ -161,13 +157,13 @@ class ActivityTimerPanel(QWidget):
     def handle_timer_toggle(self):
         """Handles the start/stop button click event"""
         activity_name = self.activity_name_input.text()
-        self.activity_timer_controller.start_stop_timer(activity_name)
+        self.activity_timer_controller.handle_start_stop_button_clicked(activity_name)
 
 
     def update_timer_state(self, is_running: bool):
         """Updates UI elements based on timer state"""
         self.activity_name_input.setReadOnly(is_running)
-        self.start_stop_btn.setText("Stop" if is_running else "Start")
+        self.timer_toggle_button.setText("Stop" if is_running else "Start")
 
 
     def update_elapsed_time(self, time_str: str) -> None:
@@ -216,7 +212,7 @@ class ActivityHistoryEntry(QWidget):
         # Arrange components in the layout
         entry_content_layout.addWidget(activity_label)
         entry_content_layout.addWidget(duration_label)
-        entry_content_layout.addWidget(self.delete_btn)
+        entry_content_layout.addWidget(self.delete_button)
 
         # Add the complete entry to the container
         container_layout.addWidget(entry_widget)

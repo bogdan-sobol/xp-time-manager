@@ -1,11 +1,11 @@
 from PyQt6.QtWidgets import QApplication
-from src.models.database import Database
 from src.views.main_window import ApplicationWindow
+from src.models.database import Database
 from src.models.user_model import UserModel
-from models.activity_timer_model import ActivityTimerModel
-from models.user_stats_model import UserStatsModel
-from controllers.activity_timer_controller import ActivityTimerController
-from controllers.user_stats_controller import UserStatsController
+from src.models.activity_timer_model import ActivityTimerModel
+from src.models.user_stats_model import UserStatsModel
+from src.controllers.activity_timer_controller import ActivityTimerController
+from src.controllers.user_stats_controller import UserStatsController
 
 def initialize_models(database: Database):
     """
@@ -28,10 +28,12 @@ def initialize_controllers(app_window: ApplicationWindow,
                         user_stats_model: UserStatsModel):
     """Initializes all controllers"""
     activity_timer_controller = ActivityTimerController(
-        app_window, activity_timer_model
+        app_window,
+        activity_timer_model
     )
     user_stats_controller = UserStatsController(
-        app_window, user_stats_model
+        app_window,
+        user_stats_model
     )
     return activity_timer_controller, user_stats_controller
 
@@ -53,7 +55,7 @@ def main():
     )
 
     # Setup main window
-    app_window.initialize_controllers(
+    app_window.register_controllers(
         activity_timer_controller,
         user_stats_controller
     )
