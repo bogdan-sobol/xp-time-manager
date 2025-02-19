@@ -1,5 +1,6 @@
 import logging
 
+
 def setup_logger():
     """Returns created logger"""
     # Get or create logger
@@ -19,7 +20,7 @@ def setup_logger():
         console_handler.setLevel(logging.INFO)
 
         # Format for log messages
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
         file_handler.setFormatter(formatter)
         console_handler.setFormatter(formatter)
 
