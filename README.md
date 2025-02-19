@@ -1,7 +1,11 @@
-# XP Time Manager 🎮⏱️
+# XP Time Manager
 
 ![XP Time Manager Screenshot](./src/views/img/readme/application_screenshot.png)
+
 *XP Time Manager main interface*
+
+## 🚧 Project Status
+This project is under active development. While it's functional for basic use, expect regular updates and improvements.
 
 ## Overview
 XP Time Manager is a unique productivity application that gamifies time tracking by incorporating Minecraft-inspired gaming elements. Turn your daily tasks into an engaging experience where you earn XP, level up, and track your productivity progress just like in Minecraft!
@@ -55,16 +59,13 @@ XP Time Manager is a unique productivity application that gamifies time tracking
 - If you encounter visual issues (such as a gray background in the history section), verify that `DEBUG_MODE` is set to `False` in `src/utils/constants.py`
 - For PyQt6 installation issues, ensure you have the latest pip version: `pip install --upgrade pip`
 
-## Project Status
-This project is under active development. While it's functional for basic use, expect regular updates and improvements.
-
 ## To-Do List
 
 ### New Features
-- [x] Activity history management with deletion functionality
-- [x] Activity management system (add/delete activities)
-- [x] Minecraft-inspired XP and Level system
-- [x] Customizable XP rates based on Minecraft mobs
+- [x] ~~Activity history management with deletion functionality~~
+- [x] ~~Activity management system (add/delete activities)~~
+- [x] ~~Minecraft-inspired XP and Level system~~
+- [x] ~~Customizable XP rates based on Minecraft mobs~~
 - [ ] Daily streaks system (track consecutive days where user meets minimum time goals)
 - [ ] Activity statistics dashboard showing time spent per activity and total time tracked
 - [ ] Hierarchical activity structure with main activities and sub-activities in separate tabs
@@ -73,6 +74,7 @@ This project is under active development. While it's functional for basic use, e
 ### Improvements
 - [ ] Date-based grouping for activity history, organizing entries by day
 - [ ] Persistent settings (window positions, selected XP rate, and last selected activity)
+- [ ] Make mob images responsive instead of fixed-size
 - [ ] Redesign XP and level bar to match Minecraft's visual style
 
 ### Bug Fixes
