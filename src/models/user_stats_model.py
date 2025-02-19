@@ -10,11 +10,18 @@ class UserStatsModel:
 
         self.logger = setup_logger()
 
+    # User Stats Management
+
     def get_user_level(self) -> int:
         return self.user_model.current_user_lvl
 
     def get_user_xp(self) -> int:
         return self.user_model.current_user_xp
+
+    # Activity Management
+
+    def get_user_activities(self):
+        return self.user_model.get_user_activities()
 
     def add_new_activity(self, activity_name) -> bool:
         """
@@ -45,9 +52,6 @@ class UserStatsModel:
             return True
 
         return False
-
-    def get_user_activities(self):
-        return self.user_model.get_user_activities()
 
     def delete_user_activity(self, activity_id: int) -> None:
         self.user_model.delete_user_activity(activity_id)
