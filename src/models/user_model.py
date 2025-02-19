@@ -1,9 +1,13 @@
-# user_model.py
 import math
+
 from ..utils.logger import setup_logger
 
 
 class UserModel:
+    """
+    Manages user data, experience points (XP), and levels.
+    """
+
     def __init__(self, database):
         self.db = database
         self.logger = setup_logger()
@@ -18,6 +22,8 @@ class UserModel:
 
         self.initialize_user()
 
+    # User Management
+
     def initialize_user(self):
         """Initializes default user and returns current user ID"""
         self.current_user_id = self.db.initialize_default_user()
@@ -31,6 +37,8 @@ class UserModel:
         self.update_user_stats()
         self.logger.info(f"Current user's level: {self.current_user_level}")
         self.logger.info(f"Current user's XP: {self.current_user_xp}")
+
+    # User Stats Management
 
     def update_user_level(self) -> int:
         """Gets current user's level from the users table in database"""
@@ -87,6 +95,8 @@ class UserModel:
         self.logger.debug(f"New user's level: {self.current_user_level}")
         self.logger.debug(f"New user's XP: {self.current_user_xp} XP")
 
+    # Activity Management
+
     def get_user_activities(self):
         return self.db.get_user_activities(self.current_user_id)
 
@@ -95,6 +105,8 @@ class UserModel:
 
     def set_user_xp_rate_mob(self, mob: str):
         self.current_selected_mob = mob
+
+    # XP and Level Calculations
 
     @staticmethod
     def evaluate_level(total_xp) -> int:
