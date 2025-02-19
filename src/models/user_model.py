@@ -69,7 +69,7 @@ class UserModel:
         Summorizes earned XP from xp_transactions table of current user
         Returns the result
         """
-        total_xp = self.db.get_total_xp(self.current_user_id)
+        total_xp = self.db.get_user_total_xp(self.current_user_id)
         return total_xp
 
     def reevaluate_user_stats(self):
