@@ -62,7 +62,7 @@ class UserStatsPanel(QWidget):
         """Updates the displayed user level"""
         self.level_display.setText(f"Level: {level}")
 
-    def update_user_xp(self, current_xp: float, xp_needed: int) -> None:
+    def update_user_xp(self, current_xp: int, xp_needed: int) -> None:
         """
         Updates the displayed XP
 

@@ -38,7 +38,7 @@ class Database:
             CREATE TABLE IF NOT EXISTS xp_transactions (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER NOT NULL,
-                xp_amount REAL NOT NULL,
+                xp_amount INTEGER NOT NULL,
                 source_type TEXT NOT NULL,
                 source_id INTEGER NOT NULL,
                 FOREIGN KEY (user_id) REFERENCES users(id)
@@ -155,10 +155,10 @@ class Database:
 
     # User's XP Management
 
-    def get_user_xp(self, user_id: int = 1) -> float:
+    def get_user_xp(self, user_id: int = 1) -> int:
         """
         Fetches user's XP by user's ID
-        Returns 0.0 if nothing found or an error occured
+        Returns 0 if nothing found or an error occured
         """
         query = "SELECT total_xp FROM users WHERE id = ?"
 
@@ -166,50 +166,56 @@ class Database:
 
         if user_xp == None:
             self.logger.warning("get_user_xp function in database.py returned None")
-            return 0.0
+            return 0
 
-        if not isinstance(user_xp, float):
-            self.logger.error(
-                "get_user_xp function in database.py returned not a float"
-            )
-            return 0.0
+        if not isinstance(user_xp, int):
+            try:
+                user_xp = int(user_xp)
+                return user_xp
+            except:
+                self.logger.error(
+                    (
+                        "get_user_xp function in database.py returned not an integer"
+                        " and return value cannot be converted to an integer"
+                    )
+                )
+                return 0
 
         return user_xp
 
-    def get_user_total_xp(self, user_id: int = 1) -> float:
+    def get_user_total_xp(self, user_id: int = 1) -> int:
         """
         Summorazies all XP transactions of one user and returns it
-        Returns 0.0 if the result is None
+        Returns 0 if the result is None
         """
         query = """
             SELECT SUM(xp_amount)
             FROM xp_transactions
             WHERE user_id = ?"""
 
-        # The xp_amount rows are stored as float, so the sum is a float
         total_xp = self._select_and_fetchone(query, (user_id,))
 
         if total_xp == None:
             self.logger.warning("get_total_xp function in database.py returned None")
-            return 0.0
+            return 0
 
-        if not isinstance(total_xp, float):
-            self.logger.warning(
-                "get_total_xp returned not a float, trying to convert it..."
-            )
+        if not isinstance(total_xp, int):
             try:
-                total_xp = float(total_xp)
+                total_xp = int(total_xp)
                 return total_xp
             except:
                 self.logger.error(
-                    "Failed to convert total XP from get_total_xp in database.py into a float"
+                    (
+                        "get_user_total_xp function in database.py returned not an integer"
+                        " and return value cannot be converted to an integer"
+                    )
                 )
-                return 0.0
+                return 0
 
         return total_xp
 
     def insert_into_xp_transactions(
-        self, xp_amount: float, source_type: str, source_id: int, user_id: int = 1
+        self, xp_amount: int, source_type: str, source_id: int, user_id: int = 1
     ):
         query = """
             INSERT INTO xp_transactions (
