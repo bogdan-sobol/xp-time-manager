@@ -7,6 +7,8 @@ from src.models.activity_timer_model import ActivityTimerModel
 from src.models.user_stats_model import UserStatsModel
 from src.controllers.activity_timer_controller import ActivityTimerController
 from src.controllers.user_stats_controller import UserStatsController
+from src.views.debug_window import DebugWindow
+from src.utils.constants import DEBUG_MODE
 
 
 def initialize_models(database: Database) -> tuple:
@@ -54,6 +56,12 @@ def main():
     app_window.register_controllers(activity_timer_controller, user_stats_controller)
     app_window.initUI()
     app_window.show()
+
+    if DEBUG_MODE:
+        debug_window = DebugWindow()
+        debug_window.initialize_model_access(activity_timer_model)
+        debug_window.initUI()
+        debug_window.show()
 
     app.exec()
 

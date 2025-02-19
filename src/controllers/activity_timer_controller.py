@@ -121,13 +121,13 @@ class ActivityTimerController:
         self.display_update_timer.timeout.connect(self._update_elapsed_time_display)
         self.display_update_timer.start(1000)  # Update every second
 
-    def _get_current_selected_mob(self) -> str:
-        return self.activity_timer_model.current_selected_mob
-
     def _update_elapsed_time_display(self) -> None:
         """Update the elapsed time shown in the timer display"""
         current_duration = self.activity_timer_model.get_current_duration()
         self.app_window.activity_timer_panel.update_elapsed_time(current_duration)
+
+    def _get_current_selected_mob(self) -> str:
+        return self.activity_timer_model.current_selected_mob
 
     def _stop_current_activity(self) -> bool:
         """

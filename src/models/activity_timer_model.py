@@ -4,7 +4,7 @@ from PyQt6.QtCore import *
 from PyQt6.QtWidgets import QListWidgetItem
 
 from ..utils.logger import setup_logger
-from ..utils.constants import MOB_XP_RATES
+from ..utils.constants import MOB_XP_RATES, TIME_FORMAT
 
 
 class ActivityTimerModel:
@@ -47,8 +47,17 @@ class ActivityTimerModel:
         duration_seconds = int(end_time - self.start_time)
         formatted_duration = self._format_duration(duration_seconds)
 
+        formatted_start_time = datetime.fromtimestamp(self.start_time).strftime(
+            TIME_FORMAT
+        )
+        formatted_end_time = datetime.fromtimestamp(end_time).strftime(TIME_FORMAT)
+
         self.db.stop_time_entry(
-            self.current_entry_id, duration_seconds, formatted_duration
+            self.current_entry_id,
+            formatted_start_time,
+            duration_seconds,
+            formatted_duration,
+            formatted_end_time,
         )
 
         earned_xp = self._calculate_earned_xp(duration_seconds)

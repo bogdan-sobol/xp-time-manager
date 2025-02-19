@@ -1,7 +1,6 @@
 import sqlite3
-from datetime import datetime
 
-from ..utils.constants import DB_NAME, TIME_FORMAT
+from ..utils.constants import DB_NAME
 from ..utils.logger import setup_logger
 
 
@@ -19,7 +18,7 @@ class Database:
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER NOT NULL,
                 activity_name TEXT NOT NULL,
-                start_time TEXT NOT NULL,
+                start_time TEXT,
                 duration TEXT,
                 duration_seconds INTEGER,
                 end_time TEXT,
@@ -248,14 +247,13 @@ class Database:
         """Creates a new entry and returns its ID"""
         query = """
             INSERT INTO time_entries
-            (user_id, activity_name, start_time)
-            VALUES (?, ?, ?);"""
+            (user_id, activity_name)
+            VALUES (?, ?);"""
 
         try:
             with sqlite3.connect(DB_NAME) as conn:
                 cur = conn.cursor()
-                start_time = datetime.now().strftime(TIME_FORMAT)
-                cur.execute(query, (user_id, activity_name, start_time))
+                cur.execute(query, (user_id, activity_name))
                 # Return entry ID
                 return cur.lastrowid
         except sqlite3.Error as e:
@@ -263,21 +261,36 @@ class Database:
             return -1
 
     def stop_time_entry(
-        self, entry_id: int, seconds_duration: int, formatted_duration: str
+        self,
+        entry_id: int,
+        formatted_start_time: str,
+        seconds_duration: int,
+        formatted_duration: str,
+        formatted_end_time: str,
     ) -> None:
-        """Adds end time and duration to current entry"""
+        """
+        Finishes entry by adding start and end time
+        along with durations
+        """
         query = """
             UPDATE time_entries
-            SET duration = ?,
+            SET start_time = ?,
+            duration = ?,
             duration_seconds = ?,
             end_time = ? WHERE id = ?;"""
 
         try:
             with sqlite3.connect(DB_NAME) as conn:
                 cur = conn.cursor()
-                end_time = datetime.now().strftime(TIME_FORMAT)
                 cur.execute(
-                    query, (formatted_duration, seconds_duration, end_time, entry_id)
+                    query,
+                    (
+                        formatted_start_time,
+                        formatted_duration,
+                        seconds_duration,
+                        formatted_end_time,
+                        entry_id,
+                    ),
                 )
         except sqlite3.Error as e:
             self.logger.error(f"Database error while finishing time entry: {e}")
