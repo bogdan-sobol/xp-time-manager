@@ -94,9 +94,6 @@ class UserStatsPanel(QWidget):
         self.setMinimumWidth(150)
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
 
-        if DEBUG_MODE:
-            self.setStyleSheet("background-color: blue;")
-
     def _create_activity_control_panel(self) -> QWidget:
         """
         Creates a panel for managing activities and XP rate settings.

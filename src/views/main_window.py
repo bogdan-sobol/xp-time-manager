@@ -56,7 +56,7 @@ class ApplicationWindow(QMainWindow):
 
     def _create_main_window(self) -> QHBoxLayout:
         """Sets up and returns the main window layout with basic configurations"""
-        self.setWindowTitle("Time Tracker")
+        self.setWindowTitle("XP Time Manager")
         self.setMinimumSize(QSize(300, 200))
         self.setGeometry(0, 0, 700, 500)
         window_layout = QHBoxLayout()
