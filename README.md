@@ -79,4 +79,4 @@ XP Time Manager is a unique productivity application that gamifies time tracking
 
 ### Bug Fixes
 - [x] Prevent time tracking when no activities are available
-- [ ] Disable activity deletion while time tracking is in progress
+- [x] Disable activity deletion while time tracking is in progress

@@ -129,6 +129,20 @@ class UserStatsController:
 
     def handle_delete_press_activity_list(self, event) -> None:
         if event.key() == Qt.Key.Key_Delete:
+            activity_timer_controller = (
+                self.app_window.activity_timer_panel.activity_timer_controller
+            )
+            is_timer_running = (
+                activity_timer_controller.activity_timer_model.is_timer_running
+            )
+
+            # Make sure timer is not running
+            if is_timer_running:
+                self.app_window.display_error_message(
+                    "You can't delete activities when tracking time"
+                )
+                return
+
             if self.app_window.show_activity_deletion_conformation():
                 self._delete_activity()
 
