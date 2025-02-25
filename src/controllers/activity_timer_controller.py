@@ -106,6 +106,13 @@ class ActivityTimerController:
         Returns:
             bool: True if activity was started successfully, False otherwise
         """
+        # Check if user has activities
+        if not self.activity_timer_model.user_has_activities:
+            self.app_window.display_error_message(
+                "Please add at least one activity first"
+            )
+            return False
+
         # Attempt to start the timer
         if self.activity_timer_model.start_timer(activity_name):
             self._start_display_updates()

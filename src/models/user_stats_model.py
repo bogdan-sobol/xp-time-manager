@@ -21,7 +21,12 @@ class UserStatsModel:
     # Activity Management
 
     def get_user_activities(self):
-        return self.user_model.get_user_activities()
+        activities = self.user_model.get_user_activities()
+
+        if not activities:
+            return None
+
+        return activities
 
     def add_new_activity(self, activity_name) -> bool:
         """
