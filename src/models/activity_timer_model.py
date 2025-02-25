@@ -20,6 +20,8 @@ class ActivityTimerModel:
         self.current_selected_item = None
         self.current_delete_btn = None
 
+        self.user_has_activities = None
+
         self.logger = setup_logger()
 
     # Timer Core Functions
@@ -95,8 +97,10 @@ class ActivityTimerModel:
         activities = self.user_model.get_user_activities()
 
         if not activities:
+            self.user_has_activities = False
             return None
 
+        self.user_has_activities = True
         return activities
 
     def delete_time_entry(self, entry_id) -> None:

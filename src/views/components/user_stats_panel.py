@@ -49,6 +49,9 @@ class UserStatsPanel(QWidget):
 
         activities = self.user_stats_controller.get_activities()
 
+        if not activities:
+            return
+
         for activity in activities:
             activity_id = activity[0]
             activity_name = activity[2]
