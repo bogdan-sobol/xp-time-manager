@@ -78,5 +78,5 @@ XP Time Manager is a unique productivity application that gamifies time tracking
 - [ ] Redesign XP and level bar to match Minecraft's visual style
 
 ### Bug Fixes
-- [ ] Prevent time tracking when no activities are available
+- [x] Prevent time tracking when no activities are available
 - [ ] Disable activity deletion while time tracking is in progress
