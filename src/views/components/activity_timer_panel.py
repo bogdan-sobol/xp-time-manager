@@ -57,14 +57,6 @@ class ActivityTimerPanel(QWidget):
             self._create_activity_entry(entry)
 
     def refresh_activity_selector(self) -> None:
-        is_timer_running = (
-            self.activity_timer_controller.activity_timer_model.is_timer_running
-        )
-
-        # Save current selected item index if timer is running
-        if is_timer_running:
-            selected_activity_index = self.activity_selector.currentIndex()
-
         self.activity_selector.clear()
 
         activities = self.activity_timer_controller.get_activities()
@@ -74,17 +66,9 @@ class ActivityTimerPanel(QWidget):
             self.activity_selector.setDisabled(True)
             return
 
-        # Enable selector if timer is not runnig
-        if not is_timer_running:
-            self.activity_selector.setDisabled(False)
-
         for activity in activities:
             activity_name = activity[2]
             self.activity_selector.addItem(activity_name)
-
-        # Restore previosly selected item if time is running
-        if is_timer_running:
-            self.activity_selector.setCurrentIndex(selected_activity_index + 1)
 
     def update_timer_state(self, is_running: bool):
         """
