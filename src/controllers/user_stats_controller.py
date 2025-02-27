@@ -160,7 +160,8 @@ class UserStatsController:
         if self.user_stats_model.add_new_activity(activity_name):
             # Refresh activity list and activity selector
             self.app_window.user_stats_panel.refresh_activity_list()
-            self.app_window.activity_timer_panel.refresh_activity_selector()
+            activity_timer_panel = self.app_window.activity_timer_panel
+            activity_timer_panel.activity_timer_controller.refresh_activity_selector()
             return True
         return False
 

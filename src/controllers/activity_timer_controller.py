@@ -1,6 +1,5 @@
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtWidgets import QWidget, QListWidgetItem
-from ..utils.constants import MAX_ACTIVITY_NAME_SIZE
 
 
 class ActivityTimerController:
@@ -63,6 +62,28 @@ class ActivityTimerController:
 
     def get_activities(self):
         return self.activity_timer_model.get_user_activities()
+
+    def refresh_activity_selector(self):
+        activity_timer_panel = self.app_window.activity_timer_panel
+        is_timer_running = self.activity_timer_model.is_timer_running
+
+        # Save current selected item index if timer is running
+        if is_timer_running:
+            selected_activity_index = (
+                activity_timer_panel.activity_selector.currentIndex()
+            )
+
+        activity_timer_panel.refresh_activity_selector()
+
+        # Enable selector if timer is not runnig
+        if not is_timer_running:
+            activity_timer_panel.activity_selector.setDisabled(False)
+
+        # Restore previosly selected item if time is running
+        if is_timer_running:
+            activity_timer_panel.activity_selector.setCurrentIndex(
+                selected_activity_index + 1
+            )
 
     # Event handlers
 
