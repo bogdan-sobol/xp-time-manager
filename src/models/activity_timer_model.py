@@ -10,6 +10,7 @@ from ..utils.constants import MOB_XP_RATES, TIME_FORMAT
 class ActivityTimerModel:
     def __init__(self, database, user_model):
         self.db = database
+        self.logger = setup_logger()
         self.user_model = user_model
 
         self.is_timer_running = False
@@ -22,7 +23,7 @@ class ActivityTimerModel:
 
         self.user_has_activities = None
 
-        self.logger = setup_logger()
+        self.total_history_entry_count = self.count_user_history_entries()
 
     # Timer Core Functions
 
@@ -68,6 +69,7 @@ class ActivityTimerModel:
         self.start_time = None
         self.current_entry_id = None
         self.is_timer_running = False
+        self.total_history_entry_count += 1
 
     def get_current_duration(self) -> str:
         if not self.is_timer_running:
@@ -78,13 +80,23 @@ class ActivityTimerModel:
 
     # Data Management Functions
 
-    def get_recent_entries(self, limit: int = 10) -> list:
+    def get_recent_entries(self, entries_quantity: int = 11) -> list:
+        self.logger.debug(
+            f"Attempting to retrieve {entries_quantity} recent time entries"
+        )
+
         recent_entries: list = self.db.get_recent_entries(
-            self.user_model.current_user_id, limit
+            self.user_model.current_user_id, entries_quantity
         )
 
         if not recent_entries:
-            self.logger.info("There are no time entries for this user")
+            self.logger.info(
+                f"No time entries found for user with ID: {self.user_model.current_user_id}"
+            )
+        else:
+            self.logger.debug(
+                f"{len(recent_entries)} time entries were returned from the database"
+            )
 
         return recent_entries
 
@@ -106,6 +118,22 @@ class ActivityTimerModel:
     def delete_time_entry(self, entry_id) -> None:
         # Deletes entry from database
         self.db.delete_time_entry(entry_id, self.user_model.current_user_id)
+        self.total_history_entry_count -= 1
+
+    def count_user_history_entries(self) -> int:
+        user_id = self.user_model.current_user_id
+
+        entries_count = self.db.count_user_history_entries(user_id)
+
+        if entries_count:
+            # Extract from tuple
+            entries_count = entries_count[0]
+        else:
+            entries_count = 0
+
+        self.logger.debug(f"Total history entries count: {entries_count}")
+
+        return entries_count
 
     # XP and Rewards Functions
 

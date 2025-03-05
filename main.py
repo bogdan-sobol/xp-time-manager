@@ -55,6 +55,7 @@ def main():
     # Setup main window
     app_window.register_controllers(activity_timer_controller, user_stats_controller)
     app_window.initUI()
+    app_window.activity_timer_panel.refresh_activity_history()
     app_window.show()
 
     if DEBUG_MODE:

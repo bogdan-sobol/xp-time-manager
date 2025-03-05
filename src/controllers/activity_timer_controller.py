@@ -1,5 +1,5 @@
 from PyQt6.QtCore import Qt, QTimer
-from PyQt6.QtWidgets import QWidget, QListWidgetItem
+from PyQt6.QtWidgets import QWidget, QListWidgetItem, QPushButton
 
 
 class ActivityTimerController:
@@ -23,14 +23,14 @@ class ActivityTimerController:
 
     # Public interface methods
 
-    def get_recent_entries(self) -> list:
+    def get_recent_entries(self, entries_quantity: int = 11) -> list:
         """
         Retrieve the list of recent time entries
 
         Returns:
             list: Recent time entries from the timer model
         """
-        return self.activity_timer_model.get_recent_entries()
+        return self.activity_timer_model.get_recent_entries(entries_quantity)
 
     def delete_time_entry(self, entry_id: int, entry_widget: QWidget) -> None:
         """
@@ -85,6 +85,15 @@ class ActivityTimerController:
                 selected_activity_index + 1
             )
 
+    def is_show_more_entries_button_needed(self, current_entries_count: int) -> bool:
+        total_entries_count = self.activity_timer_model.total_history_entry_count
+
+        if current_entries_count > 10:
+            if current_entries_count < total_entries_count:
+                return True
+
+        return False
+
     # Event handlers
 
     def handle_start_stop_button_clicked(self, activity_name: str) -> bool:
@@ -115,7 +124,20 @@ class ActivityTimerController:
         Args:
             item: The selected list widget item
         """
-        if item.data(Qt.ItemDataRole.UserRole) != "not_a_history_entry":
+        item_data = item.data(Qt.ItemDataRole.UserRole)
+
+        # If item data is empty
+        if not item_data:
+            return
+
+        if item_data == "show_more_entries":
+            activity_timer_panel = self.app_window.activity_timer_panel
+
+            activities_count = activity_timer_panel.activity_history_list.count()
+
+            # "Show more" item excluded
+            activity_timer_panel.refresh_activity_history(activities_count + 9)
+        else:
             self.activity_timer_model.show_delete_button(item)
 
     # Private helper methods (with _prefix)
