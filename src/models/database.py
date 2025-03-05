@@ -317,6 +317,21 @@ class Database:
             self.logger.error(f"Database error while getting recent entries: {e}")
             return []  # Return empty list on error
 
+    def count_user_history_entries(self, user_id: int = 1):
+        query = """
+            SELECT COUNT(*)
+            FROM time_entries
+            WHERE user_id = ?"""
+
+        try:
+            with sqlite3.connect(DB_NAME) as conn:
+                cur = conn.cursor()
+                cur.execute(query, (user_id,))
+                return cur.fetchone()
+        except sqlite3.Error as e:
+            self.logger.error(f"Database error while counting history entries: {e}")
+            return None
+
     def delete_time_entry(self, entry_id: int, user_id: int = 1) -> None:
         """
         Deletes time entry of a user

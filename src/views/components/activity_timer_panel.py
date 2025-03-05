@@ -40,14 +40,14 @@ class ActivityTimerPanel(QWidget):
         panel_layout.addWidget(self.activity_history_list)
         panel_layout.addWidget(timer_controls)
 
-        self.refresh_activity_history()
-
     # Public interface methods
 
-    def refresh_activity_history(self) -> None:
+    def refresh_activity_history(self, entries_quantity: int = 11) -> None:
         """Updates the activity history list with latest data"""
         self.activity_history_list.clear()
-        recent_entries = self.activity_timer_controller.get_recent_entries()
+        recent_entries = self.activity_timer_controller.get_recent_entries(
+            entries_quantity
+        )
 
         if not recent_entries:
             self._show_empty_history_message()
@@ -55,6 +55,21 @@ class ActivityTimerPanel(QWidget):
 
         for entry in recent_entries:
             self._create_activity_entry(entry)
+
+        if self.activity_timer_controller.is_show_more_entries_button_needed(
+            len(recent_entries)
+        ):
+            self.display_show_more_entries_button()
+
+    def display_show_more_entries_button(self) -> None:
+        show_more_button = QListWidgetItem("Show more")
+        show_more_button.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        show_more_button.setData(Qt.ItemDataRole.UserRole, "show_more_entries")
+
+        self.activity_history_list.addItem(show_more_button)
+
+        return show_more_button
 
     def refresh_activity_selector(self) -> None:
         self.activity_selector.clear()
@@ -108,7 +123,10 @@ class ActivityTimerPanel(QWidget):
                 border: none;
                 padding: 0px;
             }
-        """
+            QListWidget::item:selected {
+                color: black;
+            }
+            """
         )
 
         if DEBUG_MODE:
@@ -147,8 +165,6 @@ class ActivityTimerPanel(QWidget):
         """Displays a message when no activities are in database"""
         empty_list_message = QListWidgetItem("Currently there are no time entries.")
         empty_list_message.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-        # Set data to distiguish item from history entries
-        empty_list_message.setData(Qt.ItemDataRole.UserRole, "not_a_history_entry")
         self.activity_history_list.addItem(empty_list_message)
 
     def _create_activity_entry(self, activity_data: tuple) -> None:

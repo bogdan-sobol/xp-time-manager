@@ -99,7 +99,7 @@ class ActivityHistoryEntry(QWidget):
 
         return duration_label
 
-    def _create_delete_button(self):
+    def _create_delete_button(self) -> QPushButton:
         """Creates a circular delete button with hover effects"""
         delete_button = QPushButton("X")
 
