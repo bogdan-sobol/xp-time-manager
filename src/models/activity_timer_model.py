@@ -131,7 +131,9 @@ class ActivityTimerModel:
         else:
             entries_count = 0
 
-        self.logger.debug(f"Total history entries count: {entries_count}")
+        self.logger.debug(
+            f"Total history entries count for current user: {entries_count}"
+        )
 
         return entries_count
 
