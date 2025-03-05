@@ -4,30 +4,38 @@ from PyQt6.QtCore import *
 from PyQt6.QtWidgets import QListWidgetItem
 
 from ..utils.logger import setup_logger
-from ..utils.constants import MOB_XP_RATES, TIME_FORMAT
+from ..utils.constants import (
+    MOB_XP_RATES,
+    TIME_FORMAT,
+    DEFAULT_HISTORY_ENTRIES_DISPLAYED,
+)
 
 
-class ActivityTimerModel:
+class TimeTrackingModel:
     def __init__(self, database, user_model):
         self.db = database
         self.logger = setup_logger()
         self.user_model = user_model
 
         self.is_timer_running = False
+        # Stores ID of currently tracked time entry
+        # to insert duration after stopping time tracking
         self.current_entry_id = 0
+        # Stores the start time of currenly tracked time entry
         self.start_time = None
 
-        # Keeps track of currently selected item and its delete button
+        # Keeps track of currently selected item
+        # and its delete button in the history list
         self.current_selected_item = None
         self.current_delete_btn = None
 
         self.user_has_activities = None
 
-        self.total_history_entry_count = self.count_user_history_entries()
+        self.total_history_entries_count = self.count_history_time_entries()
 
     # Timer Core Functions
 
-    def start_timer(self, activity_name: str) -> bool:
+    def start_time_tracking(self, activity_name: str) -> bool:
         if self.is_timer_running:
             return False
 
@@ -42,9 +50,9 @@ class ActivityTimerModel:
         self.is_timer_running = True
         return True
 
-    def stop_timer(self) -> None:
+    def stop_time_tracking(self) -> None:
         if not self.is_timer_running:
-            return
+            return False
 
         end_time = datetime.now().timestamp()
         duration_seconds = int(end_time - self.start_time)
@@ -63,48 +71,57 @@ class ActivityTimerModel:
             formatted_end_time,
         )
 
-        earned_xp = self._calculate_earned_xp(duration_seconds)
+        earned_xp = self._calculate_earned_xp_for_time_session(duration_seconds)
         self.give_time_session_reward(earned_xp, self.current_entry_id)
 
         self.start_time = None
         self.current_entry_id = None
         self.is_timer_running = False
-        self.total_history_entry_count += 1
+        self.total_history_entries_count += 1
 
-    def get_current_duration(self) -> str:
+    def get_formatted_elapsed_time_since_start(self) -> str:
+        """
+        Calculate elapsed time based on start time and current time
+        Returns result as a string of the following format: "1:23:45"
+        """
         if not self.is_timer_running:
             return "0:00:00"
 
-        current_duration = datetime.now().timestamp() - self.start_time
-        return self._format_duration(current_duration)
+        duration = datetime.now().timestamp() - self.start_time
+        return self._format_duration(duration)
 
     # Data Management Functions
 
-    def get_recent_entries(self, entries_quantity: int = 11) -> list:
+    def get_history_time_entries(
+        self, entries_quantity: int = DEFAULT_HISTORY_ENTRIES_DISPLAYED
+    ) -> list:
+        """
+        Retrieve certain number of history time entries from the database
+        """
         self.logger.debug(
-            f"Attempting to retrieve {entries_quantity} recent time entries"
+            f"Attempting to retrieve {entries_quantity} history time entries"
         )
 
-        recent_entries: list = self.db.get_recent_entries(
+        time_entries: list = self.db.get_recent_entries(
             self.user_model.current_user_id, entries_quantity
         )
 
-        if not recent_entries:
+        if not time_entries:
             self.logger.info(
                 f"No time entries found for user with ID: {self.user_model.current_user_id}"
             )
-        else:
-            self.logger.debug(
-                f"{len(recent_entries)} time entries were returned from the database"
-            )
+            return None
 
-        return recent_entries
+        self.logger.debug(
+            f"{len(time_entries)} time entries were returned from the database"
+        )
+        return time_entries
 
     def get_user_activities(self):
         """
         Returns:
             List of tuples with activities if any
-            None if no activities are found
+            None if no activities were found
         """
         activities = self.user_model.get_user_activities()
 
@@ -116,11 +133,13 @@ class ActivityTimerModel:
         return activities
 
     def delete_time_entry(self, entry_id) -> None:
-        # Deletes entry from database
+        """Delete a time entry from database"""
         self.db.delete_time_entry(entry_id, self.user_model.current_user_id)
-        self.total_history_entry_count -= 1
+        # Update total entries count
+        self.total_history_entries_count -= 1
 
-    def count_user_history_entries(self) -> int:
+    def count_history_time_entries(self) -> int:
+        """Count all the history time entries in the database"""
         user_id = self.user_model.current_user_id
 
         entries_count = self.db.count_user_history_entries(user_id)
@@ -132,7 +151,7 @@ class ActivityTimerModel:
             entries_count = 0
 
         self.logger.debug(
-            f"Total history entries count for current user: {entries_count}"
+            f"Current user has {entries_count} history time entries stored in the database"
         )
 
         return entries_count
@@ -141,19 +160,22 @@ class ActivityTimerModel:
 
     def give_time_session_reward(self, earned_xp: int, entry_id: int) -> None:
         """
-        Calculates user's statistic based on earned XP
-        Sets new value in the users and xp_transactions tables
+        Calculate user's statistic based on earned XP
+        Set new value in the 'users' table
+        Add a new entry to the 'xp_transactions' table
         """
+        self.logger.debug("Attempting to give user a time tracking reward")
         user_id = self.user_model.current_user_id
         user_total_xp = self.user_model.current_user_xp
-        self.logger.debug(f"XP amount before reward: {user_total_xp}")
 
-        # Updates user's XP
+        # Update user's XP
         new_xp_amount = user_total_xp + earned_xp
-        self.logger.debug(f"New XP amount: {new_xp_amount}")
         self.user_model.set_user_xp(new_xp_amount)
 
-        # Adds entry to xp_transactions table
+        self.logger.debug(f"User's total XP before the reward: {user_total_xp}")
+        self.logger.debug(f"User's total XP after the reward: {new_xp_amount}")
+
+        # Add entry to xp_transactions table
         self.db.insert_into_xp_transactions(
             xp_amount=earned_xp,
             source_type="time_session",
@@ -161,48 +183,50 @@ class ActivityTimerModel:
             user_id=user_id,
         )
 
-        # Updates user's level
-        self.logger.debug(
-            f"User level before reward: {self.user_model.current_user_level}"
-        )
+        # Update user's level
         new_user_level = self.user_model.evaluate_level(new_xp_amount)
-        self.user_model.set_user_level(new_user_level, user_id)
-        self.logger.debug(f"New user level: {new_user_level}")
 
-    def _calculate_earned_xp(self, duration_seconds: int) -> int:
-        """Calculates earned XP for a time session and returns it"""
+        self.logger.debug(
+            f"User's level before the reward: {self.user_model.current_user_level}"
+        )
+        self.logger.debug(f"User's level after the reward: {new_user_level}")
+
+        self.user_model.set_user_level(new_user_level, user_id)
+
+    def _calculate_earned_xp_for_time_session(self, duration_seconds: int) -> int:
+        self.logger.debug("Calculating earned XP for the time session")
         earned_xp = 0
+
         if duration_seconds <= 59:
             return earned_xp
 
         # Convert seconds to minutes
         minutes_spent = int(duration_seconds / 60)
 
-        # Calculate duration based on selected mob
         selected_mob = self._get_selected_mob()
         xp_rate = MOB_XP_RATES[selected_mob]
 
         # If XP rate is a range
         if isinstance(xp_rate, list):
-            self.logger.info(
+            self.logger.debug(
                 f"XP rate is randomly selected between {xp_rate[0]} and {xp_rate[1]}"
             )
             for _ in range(minutes_spent):
                 earned_xp += randint(xp_rate[0], xp_rate[1])
         # If XP rate is static
         else:
-            self.logger.info(f"XP rate is: {xp_rate}")
+            self.logger.debug(f"XP rate is: {xp_rate}")
             earned_xp = minutes_spent * xp_rate
 
-        self.logger.info(f"XP reward is: {earned_xp} XP")
+        self.logger.info(f"XP reward for the time session: {earned_xp} XP")
         return earned_xp
 
     # UI Related Functions
 
     def show_delete_button(self, item: QListWidgetItem):
         """
-        Hides previosly showed delete button if any
-        Shows delete button of the selected item in the list
+        Show delete button of the selected item in the history list
+        Hide previosly showed delete button if any
         """
         # Hide delete button of previously selected item
         if self.current_selected_item and self.current_delete_button:

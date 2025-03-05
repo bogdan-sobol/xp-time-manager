@@ -15,16 +15,16 @@ from ...utils.constants import DEBUG_MODE
 from .history_time_entry import HistoryTimeEntry
 
 
-class ActivityTimerPanel(QWidget):
+class TimeTrackingPanel(QWidget):
     """
-    Panel containing the activity timer and history of tracked activities
+    Panel containing the activity timer and the history of tracked time entries
     """
 
     # Initialize
 
-    def __init__(self, activity_timer_controller):
+    def __init__(self, time_tracking_controller):
         super().__init__()
-        self.activity_timer_controller = activity_timer_controller
+        self.time_tracking_controller = time_tracking_controller
         self.logger = setup_logger()
         self.initUI()
 
@@ -61,7 +61,7 @@ class ActivityTimerPanel(QWidget):
         list_item = entry_widget.list_item
 
         entry_widget.setup_delete_action(
-            entry_id, self.activity_timer_controller.delete_time_entry
+            entry_id, self.time_tracking_controller.delete_time_entry
         )
 
         self.time_entries_history_list.addItem(list_item)
@@ -80,7 +80,7 @@ class ActivityTimerPanel(QWidget):
     def refresh_activity_selector(self) -> None:
         self.activity_selector.clear()
 
-        activities = self.activity_timer_controller.get_activities()
+        activities = self.time_tracking_controller.get_activities()
 
         if not activities:
             self.activity_selector.addItem("Please add an activity first...")
@@ -109,7 +109,7 @@ class ActivityTimerPanel(QWidget):
     def handle_timer_toggle(self) -> None:
         """Handles the start/stop button click event"""
         activity_name = self.activity_selector.currentText()
-        self.activity_timer_controller.handle_start_stop_button_clicked(activity_name)
+        self.time_tracking_controller.handle_start_stop_button_clicked(activity_name)
 
     # Private helper methods (with _prefix)
 
@@ -117,7 +117,7 @@ class ActivityTimerPanel(QWidget):
         """Creates a scrollable list view for displaying activity history"""
         time_entries_list = QListWidget()
         time_entries_list.itemClicked.connect(
-            self.activity_timer_controller.handle_time_entry_selection
+            self.time_tracking_controller.handle_time_entry_selection
         )
         time_entries_list.setVerticalScrollBarPolicy(
             Qt.ScrollBarPolicy.ScrollBarAlwaysOff

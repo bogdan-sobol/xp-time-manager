@@ -75,25 +75,33 @@ class UserModel:
     def reevaluate_user_stats(self):
         """
         Reevaluates user statiscic
-        via summorizing xp from the xp_transactions table
-        and calculating user level based on it
-        Updates users table with this information
+        via summorizing the 'xp_amount' rows from the 'xp_transactions' table
+        Updates the 'users' table with the calculated XP and level
         """
-        self.logger.info("Reevaluating user's statistic...")
-        self.logger.debug(f"Previous user's level: {self.current_user_level}")
-        self.logger.debug(f"Previous user's XP: {self.current_user_xp} XP")
-        # Summorizes xp amounts from the xp_transactions table for current user
+        self.logger.debug("Reevaluating user's statistic")
+        self.logger.debug(
+            f"User's level before the reevaluation: {self.current_user_level}"
+        )
+        self.logger.debug(f"User's XP before the reevaluation: {self.current_user_xp}")
+
+        # Summorize 'xp amounts' rows from the 'xp_transactions' table
         self.current_user_xp = self.reevaluate_user_xp()
-        # Updates users table with the new XP value
+
+        # Update the 'users' table with the new XP value
         self.set_user_xp(self.current_user_xp, self.current_user_id)
-        # Calculates new level based on new XP
+
+        # Calculate new level based on new XP
         self.current_user_level = self.evaluate_level(self.current_user_xp)
-        # Also update database with the new level value
+
+        # Update the 'users' table with the new level
         self.set_user_level(self.current_user_level, self.current_user_id)
 
-        self.logger.info("Finished statistic's reevaluation")
-        self.logger.debug(f"New user's level: {self.current_user_level}")
-        self.logger.debug(f"New user's XP: {self.current_user_xp} XP")
+        self.logger.debug(
+            f"User's level after the reevaluation: {self.current_user_level}"
+        )
+        self.logger.debug(
+            f"User's XP after the reevaluation: {self.current_user_xp} XP"
+        )
 
     # Activity Management
 
