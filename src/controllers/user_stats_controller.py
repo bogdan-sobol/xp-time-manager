@@ -129,11 +129,11 @@ class UserStatsController:
 
     def handle_delete_press_activity_list(self, event) -> None:
         if event.key() == Qt.Key.Key_Delete:
-            activity_timer_controller = (
-                self.app_window.activity_timer_panel.activity_timer_controller
+            time_tracking_controller = (
+                self.app_window.time_tracking_panel.time_tracking_controller
             )
             is_timer_running = (
-                activity_timer_controller.activity_timer_model.is_timer_running
+                time_tracking_controller.time_tracking_model.is_timer_running
             )
 
             # Make sure timer is not running
@@ -158,10 +158,11 @@ class UserStatsController:
     def add_activity(self, activity_name) -> bool:
         # If successfully added activity to database
         if self.user_stats_model.add_new_activity(activity_name):
-            # Refresh activity list and activity selector
+            # Refresh the activity list
             self.app_window.user_stats_panel.refresh_activity_list()
-            activity_timer_panel = self.app_window.activity_timer_panel
-            activity_timer_panel.activity_timer_controller.refresh_activity_selector()
+            # Refesh activity selector in the time tracking panel
+            time_tracking_panel = self.app_window.time_tracking_panel
+            time_tracking_panel.time_tracking_controller.refresh_activity_selector()
             return True
         return False
 
@@ -206,7 +207,7 @@ class UserStatsController:
         add_new_activity_item = activity_list.takeItem(0)
 
         self.app_window.user_stats_panel.refresh_activity_list()
-        self.app_window.activity_timer_panel.refresh_activity_selector()
+        self.app_window.time_tracking_panel.time_tracking_controller.refresh_time_entries_history()
 
         activity_list.insertItem(0, add_new_activity_item)
 

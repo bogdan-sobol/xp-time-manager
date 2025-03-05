@@ -3,39 +3,29 @@ from PyQt6.QtWidgets import QApplication
 from src.views.main_window import ApplicationWindow
 from src.models.database import Database
 from src.models.user_model import UserModel
-from src.models.activity_timer_model import ActivityTimerModel
+from src.models.time_tracking_model import TimeTrackingModel
 from src.models.user_stats_model import UserStatsModel
-from src.controllers.activity_timer_controller import ActivityTimerController
+from src.controllers.time_tracking_controller import TimeTrackingController
 from src.controllers.user_stats_controller import UserStatsController
 from src.views.debug_window import DebugWindow
 from src.utils.constants import DEBUG_MODE, DEFAULT_HISTORY_ENTRIES_DISPLAYED
 
 
 def initialize_models(database: Database) -> tuple:
-    """
-    Initialize all models.
-    Returns tuple with ActivityTimerModel and UserStatsModel instances
-    """
     user_model = UserModel(database)
-    activity_timer_model = ActivityTimerModel(database, user_model)
+    time_tracking_model = TimeTrackingModel(database, user_model)
     user_stats_model = UserStatsModel(database, user_model)
-    return activity_timer_model, user_stats_model
+    return time_tracking_model, user_stats_model
 
 
 def initialize_controllers(
     app_window: ApplicationWindow,
-    activity_timer_model: ActivityTimerModel,
+    time_tracking_model: TimeTrackingModel,
     user_stats_model: UserStatsModel,
 ) -> tuple:
-    """
-    Initializes all controllers
-    Returns activity timer controller and user stats controller
-    """
-    activity_timer_controller = ActivityTimerController(
-        app_window, activity_timer_model
-    )
+    time_tracking_controller = TimeTrackingController(app_window, time_tracking_model)
     user_stats_controller = UserStatsController(app_window, user_stats_model)
-    return activity_timer_controller, user_stats_controller
+    return time_tracking_controller, user_stats_controller
 
 
 def main():
@@ -47,16 +37,17 @@ def main():
     app_window = ApplicationWindow()
 
     # Initialize models and controllers
-    activity_timer_model, user_stats_model = initialize_models(database)
-    activity_timer_controller, user_stats_controller = initialize_controllers(
-        app_window, activity_timer_model, user_stats_model
+    time_tracking_model, user_stats_model = initialize_models(database)
+    time_tracking_controller, user_stats_controller = initialize_controllers(
+        app_window, time_tracking_model, user_stats_model
     )
 
     # Setup main window
-    app_window.register_controllers(activity_timer_controller, user_stats_controller)
+    app_window.register_controllers(time_tracking_controller, user_stats_controller)
     app_window.initUI()
 
-    activity_timer_controller.refresh_time_entries_history(
+    # Display first time entries in the history list
+    time_tracking_controller.refresh_time_entries_history(
         DEFAULT_HISTORY_ENTRIES_DISPLAYED
     )
 
@@ -64,7 +55,7 @@ def main():
 
     if DEBUG_MODE:
         debug_window = DebugWindow()
-        debug_window.initialize_model_access(activity_timer_model)
+        debug_window.initialize_model_access(time_tracking_model)
         debug_window.initUI()
         debug_window.show()
 

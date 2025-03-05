@@ -26,8 +26,8 @@ class DebugWindow(QMainWindow):
 
         self.setCentralWidget(central_widget)
 
-    def initialize_model_access(self, activity_timer_model):
-        self.activity_timer_model = activity_timer_model
+    def initialize_model_access(self, time_tracking_model):
+        self.time_tracking_model = time_tracking_model
 
     def _create_timer_debuger(self):
         label = QLabel("Timer debugger:")
@@ -50,7 +50,7 @@ class DebugWindow(QMainWindow):
     def handle_button_click(self):
         seconds = int(self.seconds_input.text())
 
-        old_start_time = self.activity_timer_model.start_time
+        old_start_time = self.time_tracking_model.start_time
 
         if seconds <= 0:
             # Decrease time if negative number
@@ -59,4 +59,4 @@ class DebugWindow(QMainWindow):
             # Increases time if positive number
             new_start_time = old_start_time - seconds
 
-        self.activity_timer_model.start_time = new_start_time
+        self.time_tracking_model.start_time = new_start_time

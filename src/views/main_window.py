@@ -2,14 +2,13 @@ from PyQt6.QtWidgets import QWidget, QMessageBox, QMainWindow, QHBoxLayout
 from PyQt6.QtCore import QSize
 
 from ..utils.logger import setup_logger
-from .components.activity_timer_panel import ActivityTimerPanel
+from .components.time_tracking_panel import TimeTrackingPanel
 from .components.user_stats_panel import UserStatsPanel
 
 
 class ApplicationWindow(QMainWindow):
     """
-    Main application window that contains both the timer
-    and user statistics dashboard
+    Main application window that contains all of the UI components
     """
 
     # Initialize
@@ -22,18 +21,18 @@ class ApplicationWindow(QMainWindow):
         """Initializes and arranges all UI components"""
         self.window_layout = self._create_main_window()
         self.user_stats_panel = UserStatsPanel(self.user_stats_controller)
-        self.activity_timer_panel = ActivityTimerPanel(self.activity_timer_controller)
+        self.time_tracking_panel = TimeTrackingPanel(self.time_tracking_controller)
         self.user_stats_controller.refresh_user_statistics()
 
         # Add panels with specific size proportions
         self.window_layout.addWidget(self.user_stats_panel, stretch=5)
-        self.window_layout.addWidget(self.activity_timer_panel, stretch=4)
+        self.window_layout.addWidget(self.time_tracking_panel, stretch=4)
 
     def register_controllers(
-        self, activity_timer_controller, user_stats_controller
+        self, time_tracking_controller, user_stats_controller
     ) -> None:
         """Links the window with its corresponding controllers"""
-        self.activity_timer_controller = activity_timer_controller
+        self.time_tracking_controller = time_tracking_controller
         self.user_stats_controller = user_stats_controller
 
     # Public interface methods
