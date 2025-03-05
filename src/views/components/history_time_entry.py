@@ -10,9 +10,9 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 
 
-class ActivityHistoryEntry(QWidget):
+class HistoryTimeEntry(QWidget):
     """
-    Widget representing a single activity entry in the history list.
+    Widget representing a single history time entry in the history list.
     Displays activity name, duration, and provides delete functionality.
     """
 

@@ -1,6 +1,8 @@
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtWidgets import QWidget, QListWidgetItem, QPushButton
 
+from ..utils.constants import DEFAULT_HISTORY_ENTRIES_DISPLAYED
+
 
 class ActivityTimerController:
     """
@@ -23,7 +25,7 @@ class ActivityTimerController:
 
     # Public interface methods
 
-    def get_recent_entries(self, entries_quantity: int = 11) -> list:
+    def get_time_entries(self, entries_quantity: int = 11) -> list:
         """
         Retrieve the list of recent time entries
 
@@ -58,10 +60,33 @@ class ActivityTimerController:
         self.activity_timer_model.current_delete_btn = None
 
         # Refresh entry list
-        self.app_window.activity_timer_panel.refresh_activity_history()
+        self.refresh_time_entries_history()
 
     def get_activities(self):
         return self.activity_timer_model.get_user_activities()
+
+    def refresh_time_entries_history(
+        self, entries_quantity: int = DEFAULT_HISTORY_ENTRIES_DISPLAYED
+    ):
+        """Updates the time entries history list"""
+        activity_timer_panel = self.app_window.activity_timer_panel
+
+        activity_timer_panel.time_entries_history_list.clear()
+
+        time_entries = self.get_time_entries(entries_quantity)
+
+        if not time_entries:
+            activity_timer_panel.show_empty_history_message()
+            return
+
+        for entry in time_entries:
+            # entry[4] corresponds to duration
+            # If time entry has duration (meaning it was completed)
+            if entry[4]:
+                activity_timer_panel.create_history_time_entry(entry)
+
+        if self.is_show_more_entries_button_needed(len(time_entries)):
+            activity_timer_panel.display_show_more_entries_button()
 
     def refresh_activity_selector(self):
         activity_timer_panel = self.app_window.activity_timer_panel
@@ -88,9 +113,8 @@ class ActivityTimerController:
     def is_show_more_entries_button_needed(self, current_entries_count: int) -> bool:
         total_entries_count = self.activity_timer_model.total_history_entry_count
 
-        if current_entries_count > 10:
-            if current_entries_count < total_entries_count:
-                return True
+        if current_entries_count < total_entries_count:
+            return True
 
         return False
 
@@ -133,10 +157,12 @@ class ActivityTimerController:
         if item_data == "show_more_entries":
             activity_timer_panel = self.app_window.activity_timer_panel
 
-            activities_count = activity_timer_panel.activity_history_list.count()
+            activities_count = activity_timer_panel.time_entries_history_list.count()
 
-            # "Show more" item excluded
-            activity_timer_panel.refresh_activity_history(activities_count + 9)
+            # (activities_count - 1) excludes the "Show more" button itself
+            self.refresh_time_entries_history(
+                (activities_count - 1) + DEFAULT_HISTORY_ENTRIES_DISPLAYED
+            )
         else:
             self.activity_timer_model.show_delete_button(item)
 
@@ -203,5 +229,5 @@ class ActivityTimerController:
 
     def _refresh_views_after_stop(self) -> None:
         """Update all relevant views after stopping an activity"""
-        self.app_window.activity_timer_panel.refresh_activity_history()
+        self.refresh_time_entries_history()
         self.app_window.user_stats_controller.refresh_user_statistics()

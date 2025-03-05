@@ -8,7 +8,7 @@ from src.models.user_stats_model import UserStatsModel
 from src.controllers.activity_timer_controller import ActivityTimerController
 from src.controllers.user_stats_controller import UserStatsController
 from src.views.debug_window import DebugWindow
-from src.utils.constants import DEBUG_MODE
+from src.utils.constants import DEBUG_MODE, DEFAULT_HISTORY_ENTRIES_DISPLAYED
 
 
 def initialize_models(database: Database) -> tuple:
@@ -55,7 +55,11 @@ def main():
     # Setup main window
     app_window.register_controllers(activity_timer_controller, user_stats_controller)
     app_window.initUI()
-    app_window.activity_timer_panel.refresh_activity_history()
+
+    activity_timer_controller.refresh_time_entries_history(
+        DEFAULT_HISTORY_ENTRIES_DISPLAYED
+    )
+
     app_window.show()
 
     if DEBUG_MODE:

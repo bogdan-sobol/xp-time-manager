@@ -12,7 +12,7 @@ from PyQt6.QtCore import Qt
 
 from ...utils.logger import setup_logger
 from ...utils.constants import DEBUG_MODE
-from .activity_history_entry import ActivityHistoryEntry
+from .history_time_entry import HistoryTimeEntry
 
 
 class ActivityTimerPanel(QWidget):
@@ -34,32 +34,38 @@ class ActivityTimerPanel(QWidget):
         self.setMinimumWidth(100)
         panel_layout.setContentsMargins(0, 0, 0, 0)
 
-        self.activity_history_list = self._create_activity_history_list()
+        self.time_entries_history_list = self._create_time_entries_history_list()
         timer_controls = self._create_timer_controls()
 
-        panel_layout.addWidget(self.activity_history_list)
+        panel_layout.addWidget(self.time_entries_history_list)
         panel_layout.addWidget(timer_controls)
 
     # Public interface methods
 
-    def refresh_activity_history(self, entries_quantity: int = 11) -> None:
-        """Updates the activity history list with latest data"""
-        self.activity_history_list.clear()
-        recent_entries = self.activity_timer_controller.get_recent_entries(
-            entries_quantity
+    def show_empty_history_message(self) -> None:
+        """Displays a message when no history time entries are in database"""
+        empty_list_message = QListWidgetItem(
+            "Currently there are no history time entries."
+        )
+        empty_list_message.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.time_entries_history_list.addItem(empty_list_message)
+
+    def create_history_time_entry(self, time_entry_data: tuple) -> None:
+        """
+        Creates and adds a time entry to the history list
+        """
+        # ID of row in the time_entries table
+        entry_id = time_entry_data[0]
+        entry_widget = HistoryTimeEntry(time_entry_data)
+        list_item = entry_widget.list_item
+
+        entry_widget.setup_delete_action(
+            entry_id, self.activity_timer_controller.delete_time_entry
         )
 
-        if not recent_entries:
-            self._show_empty_history_message()
-            return
-
-        for entry in recent_entries:
-            self._create_activity_entry(entry)
-
-        if self.activity_timer_controller.is_show_more_entries_button_needed(
-            len(recent_entries)
-        ):
-            self.display_show_more_entries_button()
+        self.time_entries_history_list.addItem(list_item)
+        self.time_entries_history_list.setItemWidget(list_item, entry_widget)
 
     def display_show_more_entries_button(self) -> None:
         show_more_button = QListWidgetItem("Show more")
@@ -67,7 +73,7 @@ class ActivityTimerPanel(QWidget):
 
         show_more_button.setData(Qt.ItemDataRole.UserRole, "show_more_entries")
 
-        self.activity_history_list.addItem(show_more_button)
+        self.time_entries_history_list.addItem(show_more_button)
 
         return show_more_button
 
@@ -107,14 +113,16 @@ class ActivityTimerPanel(QWidget):
 
     # Private helper methods (with _prefix)
 
-    def _create_activity_history_list(self) -> QWidget:
+    def _create_time_entries_history_list(self) -> QWidget:
         """Creates a scrollable list view for displaying activity history"""
-        activity_list = QListWidget()
-        activity_list.itemClicked.connect(
+        time_entries_list = QListWidget()
+        time_entries_list.itemClicked.connect(
             self.activity_timer_controller.handle_time_entry_selection
         )
-        activity_list.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        activity_list.setStyleSheet(
+        time_entries_list.setVerticalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
+        time_entries_list.setStyleSheet(
             """
             QListWidget {
                 border: none;
@@ -130,9 +138,9 @@ class ActivityTimerPanel(QWidget):
         )
 
         if DEBUG_MODE:
-            activity_list.setStyleSheet("background-color: gray;")
+            time_entries_list.setStyleSheet("background-color: gray;")
 
-        return activity_list
+        return time_entries_list
 
     def _create_timer_controls(self) -> QWidget:
         """Creates the timer control panel with input field and buttons"""
@@ -160,23 +168,3 @@ class ActivityTimerPanel(QWidget):
         control_panel_widget.setMinimumHeight(50)
 
         return control_panel_widget
-
-    def _show_empty_history_message(self) -> None:
-        """Displays a message when no activities are in database"""
-        empty_list_message = QListWidgetItem("Currently there are no time entries.")
-        empty_list_message.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.activity_history_list.addItem(empty_list_message)
-
-    def _create_activity_entry(self, activity_data: tuple) -> None:
-        """Creates and adds a new activity entry to the history list"""
-        # ID of row in the time_entries table
-        entry_id = activity_data[0]
-        entry_widget = ActivityHistoryEntry(activity_data)
-        list_item = entry_widget.list_item
-
-        entry_widget.setup_delete_action(
-            entry_id, self.activity_timer_controller.delete_time_entry
-        )
-
-        self.activity_history_list.addItem(list_item)
-        self.activity_history_list.setItemWidget(list_item, entry_widget)
