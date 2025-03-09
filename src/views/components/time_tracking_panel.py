@@ -67,6 +67,11 @@ class TimeTrackingPanel(QWidget):
         self.time_entries_history_list.addItem(list_item)
         self.time_entries_history_list.setItemWidget(list_item, entry_widget)
 
+    def create_date_item_for_time_entries_history(self, date: str):
+        date_item = QListWidgetItem(date)
+        date_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.time_entries_history_list.addItem(date_item)
+
     def display_show_more_entries_button(self) -> None:
         show_more_button = QListWidgetItem("Show more")
         show_more_button.setTextAlignment(Qt.AlignmentFlag.AlignCenter)

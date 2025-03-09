@@ -1,7 +1,12 @@
 MAX_ACTIVITY_NAME_SIZE = 50
 DB_NAME = "test.db"
-TIME_FORMAT = "%Y-%m-%d %H:%M:%S"
+
 DEBUG_MODE = False
+
+# How time is saved in the database
+TIME_FORMAT = "%Y-%m-%d %H:%M:%S"
+# How time is displayed in the time entries history
+HISTORY_TIME_FORMAT = "%a, %d %b"
 
 # How many history time entries will
 # be displayed by default
