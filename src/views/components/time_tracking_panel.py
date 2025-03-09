@@ -51,17 +51,15 @@ class TimeTrackingPanel(QWidget):
 
         self.time_entries_history_list.addItem(empty_list_message)
 
-    def create_history_time_entry(self, time_entry_data: tuple) -> None:
+    def create_history_time_entry(self, time_entry_data: dict) -> None:
         """
         Creates and adds a time entry to the history list
         """
-        # ID of row in the time_entries table
-        entry_id = time_entry_data[0]
         entry_widget = HistoryTimeEntry(time_entry_data)
         list_item = entry_widget.list_item
 
         entry_widget.setup_delete_action(
-            entry_id, self.time_tracking_controller.delete_time_entry
+            time_entry_data["id"], self.time_tracking_controller.delete_time_entry
         )
 
         self.time_entries_history_list.addItem(list_item)

@@ -296,11 +296,11 @@ class Database:
             self.logger.error(f"Database error while finishing time entry: {e}")
             return
 
-    def get_recent_entries(self, user_id: int = 1, limit: int = 10) -> list:
+    def get_history_time_entries(self, limit: int, user_id: int = 1) -> list:
         """
-        Gets most recent time entries
-        Returns them in descending order
-        As a list of tuples
+        Gets history time entries
+        Returns them in descending order (starting with the most recent)
+        As a list of dictionaries
         """
         query = """
             SELECT * FROM time_entries
@@ -312,7 +312,24 @@ class Database:
             with sqlite3.connect(DB_NAME) as conn:
                 cur = conn.cursor()
                 cur.execute(query, (user_id, limit))
-                return cur.fetchall()
+
+                history_entries = cur.fetchall()
+
+                if not history_entries:
+                    return None
+
+                column_names = []
+                for column in cur.description:
+                    column_name = column[0]
+                    column_names.append(column_name)
+
+                # Create dictionary mapping column names to values
+                result = []
+                for row in history_entries:
+                    result.append(dict(zip(column_names, row)))
+
+                return result
+
         except sqlite3.Error as e:
             self.logger.error(f"Database error while getting recent entries: {e}")
             return []  # Return empty list on error
