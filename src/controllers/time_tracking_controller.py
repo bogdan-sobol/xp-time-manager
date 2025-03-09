@@ -1,7 +1,13 @@
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtWidgets import QWidget, QListWidgetItem
 
-from ..utils.constants import DEFAULT_HISTORY_ENTRIES_DISPLAYED
+from datetime import datetime
+
+from ..utils.constants import (
+    DEFAULT_HISTORY_ENTRIES_DISPLAYED,
+    TIME_FORMAT,
+    HISTORY_TIME_FORMAT,
+)
 
 
 class TimeTrackingController:
@@ -83,14 +89,33 @@ class TimeTrackingController:
             time_tracking_panel.show_empty_history_message()
             return
 
+        previous_entry_date = None
         for entry in time_entries:
             # entry[4] corresponds to duration
             # If time entry has duration (meaning it was completed)
             if entry[4]:
+                # entry[3] corresponds to start time
+                entry_date = datetime.strptime(entry[3], TIME_FORMAT)
+                entry_date = entry_date.strftime(HISTORY_TIME_FORMAT)
+                if entry_date != previous_entry_date:
+                    time_tracking_panel.create_date_item_for_time_entries_history(
+                        entry_date
+                    )
+
                 time_tracking_panel.create_history_time_entry(entry)
+
+                previous_entry_date = entry_date
 
         if self.is_show_more_entries_button_needed(len(time_entries)):
             time_tracking_panel.display_show_more_entries_button()
+
+    def is_show_more_entries_button_needed(self, current_entries_count: int) -> bool:
+        total_entries_count = self.time_tracking_model.total_history_entries_count
+
+        if current_entries_count < total_entries_count:
+            return True
+
+        return False
 
     def refresh_activity_selector(self):
         time_tracking_panel = self.app_window.time_tracking_panel
@@ -113,14 +138,6 @@ class TimeTrackingController:
             time_tracking_panel.activity_selector.setCurrentIndex(
                 selected_activity_index + 1
             )
-
-    def is_show_more_entries_button_needed(self, current_entries_count: int) -> bool:
-        total_entries_count = self.time_tracking_model.total_history_entries_count
-
-        if current_entries_count < total_entries_count:
-            return True
-
-        return False
 
     # Event handlers
 
