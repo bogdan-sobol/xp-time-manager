@@ -12,14 +12,15 @@ from PyQt6.QtCore import Qt
 
 class HistoryTimeEntry(QWidget):
     """
-    Widget representing a single history time entry in the history list.
-    Displays activity name, duration, and provides delete functionality.
+    Widget representing a single history time entry in the history list
+    Displays activity name, duration, and provides delete functionality
     """
 
     # Initialize
 
-    def __init__(self, activity_data: tuple):
+    def __init__(self, time_entry_data: dict):
         super().__init__()
+        self.time_entry_data: dict = time_entry_data
         # Create container with proper spacing for the entry
         container_layout = self._create_entry_container()
         entry_widget = self._create_entry_background()
@@ -28,12 +29,11 @@ class HistoryTimeEntry(QWidget):
         entry_content_layout = self._create_entry_content_layout()
         entry_widget.setLayout(entry_content_layout)
 
-        activity_name = activity_data[2]
-        duration = activity_data[4]
-
         # Create and configure entry components
-        activity_label = self._create_activity_name_label(activity_name)
-        duration_label = self._create_duration_label(duration)
+        activity_label = self._create_activity_name_label(
+            time_entry_data["activity_name"]
+        )
+        duration_label = self._create_duration_label(time_entry_data["duration"])
         self.delete_button = self._create_delete_button()
 
         # Arrange components in the layout

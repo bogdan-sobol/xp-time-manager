@@ -102,8 +102,8 @@ class TimeTrackingModel:
             f"Attempting to retrieve {entries_quantity} history time entries"
         )
 
-        time_entries: list = self.db.get_recent_entries(
-            self.user_model.current_user_id, entries_quantity
+        time_entries: list = self.db.get_history_time_entries(
+            entries_quantity, self.user_model.current_user_id
         )
 
         if not time_entries:

@@ -33,7 +33,7 @@ class TimeTrackingController:
 
     # Public interface methods
 
-    def get_time_entries(
+    def get_history_time_entries(
         self, entries_quantity: int = DEFAULT_HISTORY_ENTRIES_DISPLAYED
     ) -> list:
         """
@@ -83,7 +83,7 @@ class TimeTrackingController:
 
         time_tracking_panel.time_entries_history_list.clear()
 
-        time_entries = self.get_time_entries(entries_quantity)
+        time_entries = self.get_history_time_entries(entries_quantity)
 
         if not time_entries:
             time_tracking_panel.show_empty_history_message()
@@ -91,12 +91,11 @@ class TimeTrackingController:
 
         previous_entry_date = None
         for entry in time_entries:
-            # entry[4] corresponds to duration
             # If time entry has duration (meaning it was completed)
-            if entry[4]:
-                # entry[3] corresponds to start time
-                entry_date = datetime.strptime(entry[3], TIME_FORMAT)
+            if entry["duration"]:
+                entry_date = datetime.strptime(entry["start_time"], TIME_FORMAT)
                 entry_date = entry_date.strftime(HISTORY_TIME_FORMAT)
+
                 if entry_date != previous_entry_date:
                     time_tracking_panel.create_date_item_for_time_entries_history(
                         entry_date
