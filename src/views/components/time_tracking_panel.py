@@ -24,7 +24,7 @@ class TimeTrackingPanel(QWidget):
 
     def __init__(self, time_tracking_controller):
         super().__init__()
-        self.time_tracking_controller = time_tracking_controller
+        self.controller = time_tracking_controller
         self.logger = setup_logger()
         self.initUI()
 
@@ -59,7 +59,7 @@ class TimeTrackingPanel(QWidget):
         list_item = entry_widget.list_item
 
         entry_widget.setup_delete_action(
-            time_entry_data["id"], self.time_tracking_controller.delete_time_entry
+            time_entry_data["id"], self.controller.delete_history_time_entry
         )
 
         self.time_entries_history_list.addItem(list_item)
@@ -83,7 +83,7 @@ class TimeTrackingPanel(QWidget):
     def refresh_activity_selector(self) -> None:
         self.activity_selector.clear()
 
-        activities = self.time_tracking_controller.get_activities()
+        activities = self.controller.get_activities()
 
         if not activities:
             self.activity_selector.addItem("Please add an activity first...")
@@ -112,7 +112,7 @@ class TimeTrackingPanel(QWidget):
     def handle_timer_toggle(self) -> None:
         """Handles the start/stop button click event"""
         activity_name = self.activity_selector.currentText()
-        self.time_tracking_controller.handle_start_stop_button_clicked(activity_name)
+        self.controller.handle_start_stop_button_clicked(activity_name)
 
     # Private helper methods (with _prefix)
 
@@ -120,7 +120,7 @@ class TimeTrackingPanel(QWidget):
         """Creates a scrollable list view for displaying activity history"""
         time_entries_list = QListWidget()
         time_entries_list.itemClicked.connect(
-            self.time_tracking_controller.handle_time_entry_selection
+            self.controller.handle_time_entry_selection
         )
         time_entries_list.setVerticalScrollBarPolicy(
             Qt.ScrollBarPolicy.ScrollBarAlwaysOff

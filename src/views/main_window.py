@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QWidget, QMessageBox, QMainWindow, QHBoxLayout
-from PyQt6.QtCore import QSize
+from PyQt6.QtCore import QSize, pyqtSignal
 
 from ..utils.logger import setup_logger
 from .components.time_tracking_panel import TimeTrackingPanel
@@ -13,6 +13,8 @@ class ApplicationWindow(QMainWindow):
 
     # Initialize
 
+    ui_initialized = pyqtSignal()
+
     def __init__(self):
         super().__init__()
         self.logger = setup_logger()
@@ -22,11 +24,13 @@ class ApplicationWindow(QMainWindow):
         self.window_layout = self._create_main_window()
         self.user_stats_panel = UserStatsPanel(self.user_stats_controller)
         self.time_tracking_panel = TimeTrackingPanel(self.time_tracking_controller)
-        self.user_stats_controller.refresh_user_statistics()
 
         # Add panels with specific size proportions
         self.window_layout.addWidget(self.user_stats_panel, stretch=5)
         self.window_layout.addWidget(self.time_tracking_panel, stretch=4)
+
+        # Send signal to contoller that UI is initialized
+        self.ui_initialized.emit()
 
     def register_controllers(
         self, time_tracking_controller, user_stats_controller

@@ -7,6 +7,7 @@ from ..utils.logger import setup_logger
 from ..utils.constants import (
     MOB_XP_RATES,
     TIME_FORMAT,
+    HISTORY_TIME_FORMAT,
     DEFAULT_HISTORY_ENTRIES_DISPLAYED,
 )
 
@@ -90,7 +91,7 @@ class TimeTrackingModel:
         duration = datetime.now().timestamp() - self.start_time
         return self._format_duration(duration)
 
-    # Data Management Functions
+    # Time Entries History Functions
 
     def get_history_time_entries(
         self, entries_quantity: int = DEFAULT_HISTORY_ENTRIES_DISPLAYED
@@ -116,6 +117,14 @@ class TimeTrackingModel:
             f"{len(time_entries)} time entries were returned from the database"
         )
         return time_entries
+
+    def convert_start_time_to_history_date(self, start_time: str) -> str:
+        """
+        Converts the database time string to
+        time entries history date format
+        """
+        datetime_object = datetime.strptime(start_time, TIME_FORMAT)
+        return datetime_object.strftime(HISTORY_TIME_FORMAT)
 
     def get_user_activities(self):
         """

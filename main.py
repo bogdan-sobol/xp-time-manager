@@ -8,7 +8,7 @@ from src.models.user_stats_model import UserStatsModel
 from src.controllers.time_tracking_controller import TimeTrackingController
 from src.controllers.user_stats_controller import UserStatsController
 from src.views.debug_window import DebugWindow
-from src.utils.constants import DEBUG_MODE, DEFAULT_HISTORY_ENTRIES_DISPLAYED
+from src.utils.constants import DEBUG_MODE
 
 
 def initialize_models(database: Database) -> tuple:
@@ -26,6 +26,13 @@ def initialize_controllers(
     time_tracking_controller = TimeTrackingController(app_window, time_tracking_model)
     user_stats_controller = UserStatsController(app_window, user_stats_model)
     return time_tracking_controller, user_stats_controller
+
+
+def run_debug_window(time_tracking_model):
+    debug_window = DebugWindow()
+    debug_window.initialize_model_access(time_tracking_model)
+    debug_window.initUI()
+    debug_window.show()
 
 
 def main():
@@ -46,18 +53,10 @@ def main():
     app_window.register_controllers(time_tracking_controller, user_stats_controller)
     app_window.initUI()
 
-    # Display first time entries in the history list
-    time_tracking_controller.refresh_time_entries_history(
-        DEFAULT_HISTORY_ENTRIES_DISPLAYED
-    )
-
     app_window.show()
 
     if DEBUG_MODE:
-        debug_window = DebugWindow()
-        debug_window.initialize_model_access(time_tracking_model)
-        debug_window.initUI()
-        debug_window.show()
+        run_debug_window(time_tracking_model)
 
     app.exec()
 
