@@ -141,8 +141,8 @@ class TimeTrackingModel:
         self.user_has_activities = True
         return activities
 
-    def delete_time_entry(self, entry_id) -> None:
-        """Delete a time entry from database"""
+    def delete_history_time_entry(self, entry_id) -> None:
+        """Delete a history time entry from database"""
         self.db.delete_time_entry(entry_id, self.user_model.current_user_id)
         # Update total entries count
         self.total_history_entries_count -= 1
