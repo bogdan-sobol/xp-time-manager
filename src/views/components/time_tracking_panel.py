@@ -91,8 +91,7 @@ class TimeTrackingPanel(QWidget):
             return
 
         for activity in activities:
-            activity_name = activity[2]
-            self.activity_selector.addItem(activity_name)
+            self.activity_selector.addItem(activity["name"])
 
     def update_timer_state(self, is_running: bool):
         """
@@ -114,7 +113,7 @@ class TimeTrackingPanel(QWidget):
         activity_name = self.activity_selector.currentText()
         self.controller.handle_start_stop_button_clicked(activity_name)
 
-    # Private helper methods (with _prefix)
+    # Private helper methods
 
     def _create_time_entries_history_list(self) -> QWidget:
         """Creates a scrollable list view for displaying activity history"""

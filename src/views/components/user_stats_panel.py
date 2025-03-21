@@ -53,11 +53,8 @@ class UserStatsPanel(QWidget):
             return
 
         for activity in activities:
-            activity_id = activity[0]
-            activity_name = activity[2]
-
-            item = QListWidgetItem(activity_name)
-            item.setData(Qt.ItemDataRole.UserRole, {"activity_id": activity_id})
+            item = QListWidgetItem(activity["name"])
+            item.setData(Qt.ItemDataRole.UserRole, {"activity_id": activity["id"]})
 
             self.activity_list.addItem(item)
 

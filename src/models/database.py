@@ -318,15 +318,9 @@ class Database:
                 if not history_entries:
                     return None
 
-                column_names = []
-                for column in cur.description:
-                    column_name = column[0]
-                    column_names.append(column_name)
-
-                # Create dictionary mapping column names to values
-                result = []
-                for row in history_entries:
-                    result.append(dict(zip(column_names, row)))
+                result = self._convert_into_list_of_dicts(
+                    cur.description, history_entries
+                )
 
                 return result
 
@@ -407,6 +401,10 @@ class Database:
             self.logger.error(f"Database error while deleting activity: {e}")
 
     def get_user_activities(self, user_id: int = 1) -> list:
+        """
+        Gets pre-defined user activities
+        Returns them as a list of dictionaries
+        """
         query = """
             SELECT * FROM activities
             WHERE user_id = ?
@@ -416,7 +414,35 @@ class Database:
             with sqlite3.connect(DB_NAME) as conn:
                 cur = conn.cursor()
                 cur.execute(query, (user_id,))
-                return cur.fetchall()
+
+                activities = cur.fetchall()
+
+                if not activities:
+                    return None
+
+                result = self._convert_into_list_of_dicts(cur.description, activities)
+
+                return result
+
         except sqlite3.Error as e:
             self.logger.error(f"Database error while getting user activities: {e}")
             return []
+
+    # Private helper methods
+
+    @staticmethod
+    def _convert_into_list_of_dicts(cur_desc, query_result):
+        """
+        Maps SQLite query column names to their respective values
+        Returns a list of dictionaries
+        """
+        column_names = []
+        for column in cur_desc:
+            name = column[0]
+            column_names.append(name)
+
+        result = []
+        for row in query_result:
+            result.append(dict(zip(column_names, row)))
+
+        return result
